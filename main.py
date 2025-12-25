@@ -23,7 +23,11 @@ while running:
     if hasattr(current, "next_scene") and current.next_scene:
         if current.next_scene == "Game1":
             print("Game1")
-            pass
+        elif current.next_scene == "Game2":
+            print("Game2")
+        elif current.next_scene == "Exit":
+            print("Exit")
+            break
         current.next_scene = None
 
     current.update()
