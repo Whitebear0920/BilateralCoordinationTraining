@@ -22,7 +22,12 @@ class HandMovementRecognize:
         self.movement_recognize = self.MovementRecognize(self)
 
     def external_api(self):
-        pass
+        return {
+            "left_circle":self.movement_recognize.left_circle_loop, "right_circle":self.movement_recognize.right_circle_loop,
+            "left_vertical_loop":self.movement_recognize.left_vertical_loop, "right_vertical_loop":self.movement_recognize.right_vertical_loop,
+            "left_horizontal_loop":self.movement_recognize.left_horizontal_loop, "right_horizontal_loop":self.movement_recognize.right_horizontal_loop,
+        }
+
 
     def clear(self):
         self.camera_and_mdpp_inst.camera_stop()
@@ -105,15 +110,26 @@ class HandMovementRecognize:
             self.hmr = hmr
             self.clear_flag = False
 
+            #method initialize
+            self.left_circle_method = RMethod.CircularRecognition()
+            self.right_circle_method = RMethod.CircularRecognition()
+            self.left_horizontal_method = RMethod.HorizontalRecognition()
+            self.right_horizontal_method = RMethod.HorizontalRecognition()
+            self.left_vertical_method = RMethod.VerticalRecognition()
+            self.right_vertical_method = RMethod.VerticalRecognition()
+
+            self.left_circle_loop = 0
+            self.right_circle_loop = 0
+            self.left_horizontal_loop = 0
+            self.right_horizontal_loop = 0
+            self.left_vertical_loop = 0
+            self.right_vertical_loop = 0
+
             self.movement_recognize_main()
-        
+
 
 
         def movement_recognize(self):
-            #method initialize
-            circle_method = RMethod.CircularRecognition()
-
-            # body landmark  extraction
             while True:
                 if self.clear_flag:
                     break
@@ -133,13 +149,28 @@ class HandMovementRecognize:
 
                         t_sec = time.time()
                         # horizontal movement
+                        left_h_new_loop = self.left_horizontal_method.update(shoulder_xy=left_shoulder_xy, wrist_xy=left_wrist_xy, t_sec=t_sec)
+                        right_h_new_loop = self.right_horizontal_method.update(shoulder_xy=right_shoulder_xy, wrist_xy=right_wrist_xy, t_sec=t_sec)
+                        if left_h_new_loop > 0:
+                            self.left_horizontal_loop = self.left_horizontal_method.count
+                        if right_h_new_loop > 0:
+                            self.right_horizontal_loop = self.right_horizontal_method.count
 
                         # vertical movement
+                        left_v_new_loop = self.left_vertical_method.update(shoulder_xy=left_shoulder_xy, wrist_xy=left_wrist_xy, t_sec=t_sec)
+                        right_v_new_loop =  self.right_vertical_method.update(shoulder_xy=right_shoulder_xy, wrist_xy=right_wrist_xy, t_sec=t_sec)
+                        if left_v_new_loop > 0:
+                            self.left_vertical_loop = self.left_vertical_method.count
+                        if right_v_new_loop > 0:
+                            self.right_vertical_loop = self.right_vertical_method.count
 
                         # circle movement
-                        new_loop = circle_method.update(shoulder_xy=left_shoulder_xy, elbow_xy=left_elbow_xy, wrist_xy=left_wrist_xy, t_sec=t_sec)
-                        if new_loop >= 0:
-                            print(f"new loop detected. total : {circle_method.total}")
+                        left_new_loop = self.left_circle_method.update(shoulder_xy=left_shoulder_xy, elbow_xy=left_elbow_xy, wrist_xy=left_wrist_xy, t_sec=t_sec)
+                        if left_new_loop > 0:
+                            self.left_circle_loop = self.left_circle_method.total
+                        right_new_loop = self.right_circle_method.update(shoulder_xy=right_shoulder_xy, elbow_xy=right_elbow_xy, wrist_xy=right_wrist_xy, t_sec=t_sec)
+                        if right_new_loop > 0:
+                            self.right_circle_loop = self.right_circle_method.total
                 else:
                     time.sleep(0.001)
 
