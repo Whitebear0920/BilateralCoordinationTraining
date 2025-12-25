@@ -1,6 +1,7 @@
 import os
 import cv2
 import multiprocessing as mp
+mp.set_start_method("spawn", force=True)
 import threading
 import queue
 import mediapipe as mp_task
@@ -226,6 +227,10 @@ class MDP_MUL_PROCE:
     def get_result(self, idx):
         with self._collector_lock:
             return self.results.get(idx, None)
+
+    def clear_memory(self):
+        self.results = {}
+        self.image_counter = 0
 
     def get_processed_frame_nums(self):
         if not self.results:
