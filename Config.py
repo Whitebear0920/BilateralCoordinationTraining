@@ -1,0 +1,9 @@
+#screen
+WIDTH, HEIGHT = 1920, 1080
+
+#color
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+GRAY = (180, 180, 180)
+BLUE = (70, 120, 255)
+GREEN = (0,255,0)
