@@ -1,6 +1,7 @@
 import os
 import cv2
 import multiprocessing as mp
+mp.set_start_method("spawn", force=True)
 import threading
 import queue
 import mediapipe as mp_task
