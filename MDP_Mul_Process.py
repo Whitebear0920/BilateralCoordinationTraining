@@ -228,6 +228,10 @@ class MDP_MUL_PROCE:
         with self._collector_lock:
             return self.results.get(idx, None)
 
+    def clear_memory(self):
+        self.results = {}
+        self.image_counter = 0
+
     def get_processed_frame_nums(self):
         if not self.results:
             return 0
