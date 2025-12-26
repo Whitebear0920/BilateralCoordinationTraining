@@ -94,12 +94,13 @@ class VerticalRecognition:
         return new_counts
 
 class CircularRecognition:
-    def __init__(self, k_min=0.7, w_min=0.8, w_max=12.0, max_step=0.8, k_step=4):
+    def __init__(self, k_min=0.7, w_min=0.8, w_max=12.0, max_step=0.8, k_step=4, direction = "CCW"):
         self.k_min = k_min
         self.w_min = w_min
         self.w_max = w_max
         self.max_step = max_step
         self.k_step = k_step
+        self.direction = direction
 
         self.theta_hist = deque(maxlen=30)  # 存 (t, theta)
         self.acc = 0.0
@@ -149,8 +150,12 @@ class CircularRecognition:
         if not (self.w_min <= w <= self.w_max):
             return 0
 
-        self.acc += dtheta
-
+        if self.direction == "CCW":
+            if dtheta > 0:
+                self.acc += dtheta
+        elif  self.direction == "CW":
+            if dtheta < 0:
+                self.acc += abs(dtheta)
         #計算次數
         new_loops = 0
         two_pi = 2 * math.pi

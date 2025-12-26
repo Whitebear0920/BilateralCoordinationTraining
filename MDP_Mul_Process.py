@@ -7,8 +7,6 @@ import queue
 import mediapipe as mp_task
 import numpy as np
 
-
-
 def _mdp_worker(model_kind, model_path, input_q, output_q):
     BaseOptions = mp_task.tasks.BaseOptions
     VisionRunningMode = mp_task.tasks.vision.RunningMode
