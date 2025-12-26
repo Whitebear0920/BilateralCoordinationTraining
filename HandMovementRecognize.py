@@ -23,6 +23,7 @@ class HandMovementRecognize:
 
     def external_api(self):
         return {
+            "now_frame" : self.now_frame,
             "left_ccw_circle":self.movement_recognize.left_ccw_circle_loop, "right_ccw_circle":self.movement_recognize.right_ccw_circle_loop,
             "left_cw_circle": self.movement_recognize.left_cw_circle_loop, "right_cw_circle": self.movement_recognize.right_cw_circle_loop,
             "left_vertical_loop":self.movement_recognize.left_vertical_loop, "right_vertical_loop":self.movement_recognize.right_vertical_loop,
