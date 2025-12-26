@@ -9,7 +9,7 @@ class GestureManager:
             self.hm = HandMovementRecognize()
             self.hm.camera_and_mdpp_inst.run_mediapipe()
             self.hm.camera_and_mdpp_inst.camera_start()
-            self.api = self.hm.external_api()
+            self.api = self.hm.external_api
 
     def stop(self):
         if self.hm:
