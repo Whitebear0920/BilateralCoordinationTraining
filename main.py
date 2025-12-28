@@ -33,10 +33,15 @@ def main():
             elif current.next_scene == "Game2":
                 gesture_mgr.stop()
                 print("Game2")
+            elif current.next_scene == "Menu":
+                gesture_mgr.stop()
+                current = menu
+                print("Menu")
             elif current.next_scene == "Exit":
                 gesture_mgr.stop()
                 print("Exit")
                 break
+            
             current.next_scene = None
 
         current.update()

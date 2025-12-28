@@ -10,12 +10,13 @@ class Game1Scene:
         self.next_scene = None
         self.font = font
         self.gesture = gesture
+        self.next_scene = None
 
         self.state = "BREAK"
         self.current_action_index = 0
         self.state_start_time  = time.time()
 
-        self.action_duration = 10.0 #動作時間
+        self.action_duration = 15.0 #動作時間
         self.break_duration = 5.0   #休息時間
         self.window_sec = 1.0       #檢測時長
         
@@ -24,7 +25,7 @@ class Game1Scene:
         self.score = 0
 
         self.frame_rect = pygame.Rect(0, 0, 320, 240) #鏡頭
-        self.enabled_action_indices = [0, 2, 4, 7]    #啟用動作組
+        self.enabled_action_indices = [4, 2]    #啟用動作組
         self.action_sets = [
             {
                 "name": "雙手水平",
@@ -123,6 +124,11 @@ class Game1Scene:
         if self.state == "ACTION":
             # 時間結束進入 BREAK
             self.ACTION(now)
+            return
+        
+        if self.state == "STOP":
+            self.next_scene = "Menu"
+            return
         pass
     
     def BREAK(self,now):
@@ -137,6 +143,9 @@ class Game1Scene:
     def ACTION(self,now):
         if now - self.state_start_time >= self.action_duration:
             self.current_action_index = (self.current_action_index + 1) % len(self.enabled_action_indices)
+            if self.current_action_index == 0:
+                self.state = "STOP"
+                return
             self.state = "BREAK"
             self.state_start_time = now
             self.window_start_time = None
@@ -170,21 +179,23 @@ class Game1Scene:
 
         # ===== 目前動作 =====
         action = self.action_sets[self.enabled_action_indices[self.current_action_index]]
-        self.draw_text(f"動作：{action['name']}", 360, 40)
+        if self.state != "STOP":
+            self.draw_text(f"動作：{action['name']}", 360, 40)
 
-        # ===== 狀態 + 倒數 =====
-        if self.state == "ACTION":
-            remain = max(0, int(self.action_duration - (now - self.state_start_time)))
-            self.draw_text(f"狀態：動作中", 360, 80, (0, 200, 0))
-            self.draw_text(f"剩餘時間：{remain}s", 360, 120)
+            # ===== 狀態 + 倒數 =====
+            if self.state == "ACTION":
+                remain = max(0, int(self.action_duration - (now - self.state_start_time)))
+                self.draw_text(f"狀態：動作中", 360, 80, (0, 200, 0))
+                self.draw_text(f"剩餘時間：{remain}s", 360, 120)
+            else:
+                remain = max(0, int(self.break_duration - (now - self.state_start_time)))
+                self.draw_text(f"狀態：休息", 360, 80, (200, 200, 0))
+                self.draw_text(f"休息倒數：{remain}s", 360, 120)
+
+            # ===== 分數 =====
+            self.draw_text(f"分數：{self.score}", 360, 160, (255, 200, 50))
         else:
-            remain = max(0, int(self.break_duration - (now - self.state_start_time)))
-            self.draw_text(f"狀態：休息", 360, 80, (200, 200, 0))
-            self.draw_text(f"休息倒數：{remain}s", 360, 120)
-
-        # ===== 分數 =====
-        self.draw_text(f"分數：{self.score}", 360, 160, (255, 200, 50))
-    
+            self.draw_text(f"最後得分：{self.score}",Config.WIDTH//2,Config.HEIGHT//2)
     def draw_text(self, text, x, y, color=(255,255,255)):
         surf = self.font.render(text, True, color)
         self.screen.blit(surf, (x, y))
