@@ -24,6 +24,7 @@ class HandMovementRecognize:
     def external_api(self):
         return {
             "now_frame" : self.now_frame,
+            "left_wrist" : self.movement_recognize.left_wrist_coordinate, "right_wrist" : self.movement_recognize.right_wrist_coordinate,
             "left_ccw_circle":self.movement_recognize.left_ccw_circle_loop, "right_ccw_circle":self.movement_recognize.right_ccw_circle_loop,
             "left_cw_circle": self.movement_recognize.left_cw_circle_loop, "right_cw_circle": self.movement_recognize.right_cw_circle_loop,
             "left_vertical_loop":self.movement_recognize.left_vertical_loop, "right_vertical_loop":self.movement_recognize.right_vertical_loop,
@@ -130,6 +131,9 @@ class HandMovementRecognize:
             self.left_vertical_loop = 0
             self.right_vertical_loop = 0
 
+            self.left_wrist_coordinate = None
+            self.right_wrist_coordinate = None
+
             self.movement_recognize_main()
 
         def movement_recognize(self):
@@ -139,6 +143,8 @@ class HandMovementRecognize:
                 if self.hmr.run_flag:
                     this_frame = self.hmr.camera_and_mdpp_inst.mdpp.get_result(self.recognize_frame_num)
                     if this_frame is not None:
+                        self.left_wrist_coordinate = this_frame["pose_landmarks"][15][0:2]
+                        self.right_wrist_coordinate = this_frame["pose_landmarks"][16][0:2]
                         self.recognize_frame_num += 1
                     else:
                         continue
