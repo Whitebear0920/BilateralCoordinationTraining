@@ -158,7 +158,7 @@ class CircularRecognition:
                 self.acc += abs(dtheta)
         #計算次數
         new_loops = 0
-        two_pi = 2 * math.pi
+        two_pi = 1/6 * math.pi
         while abs(self.acc) >= two_pi:
             new_loops += 1
             self.total += 1
