@@ -83,6 +83,7 @@ def _serialize_result(model_kind, result):
     elif model_kind == "hands":
         hands = []
         if result.hand_landmarks:
+            hands_detected_list = []
             for i, hand in enumerate(result.hand_landmarks):
                 # 讀取 Left / Right
                 handed = None
@@ -92,6 +93,7 @@ def _serialize_result(model_kind, result):
                 else:
                     handed = "Unknown"
                     score = 0.0
+                hands_detected_list.append(handed)
                 # Landmark 座標
                 lm_list = []
                 for lm in hand:
@@ -101,6 +103,9 @@ def _serialize_result(model_kind, result):
                     "score": score,
                     "landmarks": lm_list
                 })
+            hands_detected_list.sort()
+            if hands_detected_list != ["Left", "Right"]:
+                hands = []
         return {"hand_landmarks": hands}
     else:
         return {}
