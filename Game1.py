@@ -14,12 +14,13 @@ class Game1Scene:
         self.next_scene = None
 
         self.hand_img = pygame.image.load(f"Assets/Image/Game1/hand.png").convert_alpha()
+        self.score_sfx = pygame.mixer.Sound(f"Assets/Sound/coin.wav")
         
         self.state = "BREAK"
         self.current_action_index = 0
         self.state_start_time  = time.time()
 
-        self.action_duration = 5.0 #動作時間
+        self.action_duration = 10.0 #動作時間
         self.break_duration = 5.0   #休息時間
         self.window_sec = 1.0       #檢測時長
         
@@ -30,7 +31,7 @@ class Game1Scene:
         self.frame_rect = pygame.Rect(0, 0, 320, 240) #鏡頭
         self.enabled_action_indices = [2,4]    #啟用動作組
         self.action_sets = [
-            {
+            {#0
                 "RHand": "HORIZONTAL",
                 "LHand": "HORIZONTAL",
                 "name": "雙手水平",
@@ -39,7 +40,7 @@ class Game1Scene:
                     g["right_horizontal_loop"] > s["right_horizontal_loop"]
                 )
             },
-            {
+            {#1
                 "RHand": "VERTICAL",
                 "LHand": "VERTICAL",
                 "name": "雙手垂直",
@@ -48,7 +49,7 @@ class Game1Scene:
                     g["right_vertical_loop"] > s["right_vertical_loop"]
                 )
             },
-            {
+            {#2
                 "RHand": "HORIZONTAL",
                 "LHand": "VERTICAL",
                 "name": "左垂直 + 右水平",
@@ -57,7 +58,7 @@ class Game1Scene:
                     g["right_horizontal_loop"] > s["right_horizontal_loop"]
                 )
             },
-            {
+            {#3
                 "RHand": "VERTICAL",
                 "LHand": "HORIZONTAL",
                 "name": "左水平 + 右垂直",
@@ -66,7 +67,7 @@ class Game1Scene:
                     g["right_vertical_loop"] > s["right_vertical_loop"]
                 )
             },
-            {
+            {#4
                 "RHand": "CW",
                 "LHand": "CCW",
                 "name": "左逆 + 右順",
@@ -75,7 +76,7 @@ class Game1Scene:
                     g["right_cw_circle"] > s["right_cw_circle"]
                 )
             },
-            {
+            {#5
                 "RHand": "CCW",
                 "LHand": "CCW",
                 "name": "左逆 + 右逆",
@@ -84,7 +85,7 @@ class Game1Scene:
                     g["right_ccw_circle"] > s["right_ccw_circle"]
                 )
             },
-            {
+            {#6
                 "RHand": "CCW",
                 "LHand": "CW",
                 "name": "左順 + 右逆",
@@ -93,7 +94,7 @@ class Game1Scene:
                     g["right_ccw_circle"] > s["right_ccw_circle"]
                 )
             },
-            {
+            {#7
                 "RHand": "CW",
                 "LHand": "CW",
                 "name": "左順 + 右順",
@@ -199,6 +200,7 @@ class Game1Scene:
             action = self.action_sets[self.enabled_action_indices[self.current_action_index]]
             if action["check"](self.last_snapshot, self.window_snapshot):
                 self.score += 1
+                self.score_sfx.play()
                 print(f"✅ {action['name']} 成功，目前分數{self.score}")
             self.window_start_time = None
             self.window_snapshot = None

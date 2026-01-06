@@ -9,6 +9,7 @@ def main():
     gesture_mgr = GestureManager()
 
     pygame.init()
+    pygame.mixer.init()
     screen = pygame.display.set_mode((Config.WIDTH, Config.HEIGHT))
     clock = pygame.time.Clock()
 

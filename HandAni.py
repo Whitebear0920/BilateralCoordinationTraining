@@ -23,7 +23,6 @@ class HandAni:
         self.y = self.base_y
 
     def reset(self):
-        """重新開始動畫週期"""
         self.start_time = time.time()
 
     def update(self):
@@ -41,11 +40,11 @@ class HandAni:
             self.x = self.base_x + self.amplitude * math.sin(phase)
             self.y = self.base_y
 
-        elif self.mode == "CW":
+        elif self.mode == "CCW":
             self.x = self.base_x + self.radius * math.cos(-phase)
             self.y = self.base_y + self.radius * math.sin(-phase)
 
-        elif self.mode == "CCW":
+        elif self.mode == "CW":
             self.x = self.base_x + self.radius * math.cos(phase)
             self.y = self.base_y + self.radius * math.sin(phase)
 
