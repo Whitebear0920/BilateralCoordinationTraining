@@ -12,6 +12,8 @@ class Game1Scene:
         self.gesture = gesture
         self.next_scene = None
 
+        self.hand_img = pygame.image.load(f"Assets/Image/Game1/hand.png").convert_alpha()
+
         self.state = "BREAK"
         self.current_action_index = 0
         self.state_start_time  = time.time()
@@ -94,6 +96,7 @@ class Game1Scene:
 
     def draw(self):
         self.screen.fill((40, 40, 40))
+        self.screen.blit(self.hand_img, (360, 200))
         self.draw_ui()
         self.draw_camera()
     
