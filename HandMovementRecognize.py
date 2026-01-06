@@ -24,7 +24,6 @@ class HandMovementRecognize:
     def external_api(self):
         return {
             "now_frame" : self.now_frame,
-            "left_wrist" : self.movement_recognize.left_wrist_coordinate, "right_wrist" : self.movement_recognize.right_wrist_coordinate,
             "left_ccw_circle":self.movement_recognize.left_ccw_circle_loop, "right_ccw_circle":self.movement_recognize.right_ccw_circle_loop,
             "left_cw_circle": self.movement_recognize.left_cw_circle_loop, "right_cw_circle": self.movement_recognize.right_cw_circle_loop,
             "left_vertical_loop":self.movement_recognize.left_vertical_loop, "right_vertical_loop":self.movement_recognize.right_vertical_loop,
@@ -131,9 +130,6 @@ class HandMovementRecognize:
             self.left_vertical_loop = 0
             self.right_vertical_loop = 0
 
-            self.left_wrist_coordinate = None
-            self.right_wrist_coordinate = None
-
             self.movement_recognize_main()
 
         def movement_recognize(self):
@@ -143,51 +139,63 @@ class HandMovementRecognize:
                 if self.hmr.run_flag:
                     this_frame = self.hmr.camera_and_mdpp_inst.mdpp.get_result(self.recognize_frame_num)
                     if this_frame is not None:
-                        self.left_wrist_coordinate = this_frame["pose_landmarks"][15][0:2]
-                        self.right_wrist_coordinate = this_frame["pose_landmarks"][16][0:2]
+                        if len(this_frame["pose_landmarks"]) > 0:
+                            left_shoulder_xy = this_frame["pose_landmarks"][11][0:2]
+                            right_shoulder_xy = this_frame["pose_landmarks"][12][0:2]
+                            left_elbow_xy = this_frame["pose_landmarks"][13][0:2]
+                            right_elbow_xy = this_frame["pose_landmarks"][14][0:2]
+                            left_wrist_xy = this_frame["pose_landmarks"][15][0:2]
+                            right_wrist_xy = this_frame["pose_landmarks"][16][0:2]
+
+                            t_sec = time.time()
+                            # horizontal movement
+                            left_h_new_loop = self.left_horizontal_method.update(shoulder_xy=left_shoulder_xy,
+                                                                                 wrist_xy=left_wrist_xy, t_sec=t_sec)
+                            right_h_new_loop = self.right_horizontal_method.update(shoulder_xy=right_shoulder_xy,
+                                                                                   wrist_xy=right_wrist_xy, t_sec=t_sec)
+                            if left_h_new_loop > 0:
+                                self.left_horizontal_loop = self.left_horizontal_method.count
+                            if right_h_new_loop > 0:
+                                self.right_horizontal_loop = self.right_horizontal_method.count
+
+                            # vertical movement
+                            left_v_new_loop = self.left_vertical_method.update(shoulder_xy=left_shoulder_xy,
+                                                                               wrist_xy=left_wrist_xy, t_sec=t_sec)
+                            right_v_new_loop = self.right_vertical_method.update(shoulder_xy=right_shoulder_xy,
+                                                                                 wrist_xy=right_wrist_xy, t_sec=t_sec)
+                            if left_v_new_loop > 0:
+                                self.left_vertical_loop = self.left_vertical_method.count
+                            if right_v_new_loop > 0:
+                                self.right_vertical_loop = self.right_vertical_method.count
+
+                            # counter clockwise circle movement
+                            left_ccw_new_loop = self.left_ccw_circle_method.update(shoulder_xy=left_shoulder_xy,
+                                                                                   elbow_xy=left_elbow_xy,
+                                                                                   wrist_xy=left_wrist_xy, t_sec=t_sec)
+                            right_ccw_new_loop = self.right_ccw_circle_method.update(shoulder_xy=right_shoulder_xy,
+                                                                                     elbow_xy=right_elbow_xy,
+                                                                                     wrist_xy=right_wrist_xy,
+                                                                                     t_sec=t_sec)
+                            if left_ccw_new_loop > 0:
+                                self.left_ccw_circle_loop = self.left_ccw_circle_method.total
+                            if right_ccw_new_loop > 0:
+                                self.right_ccw_circle_loop = self.right_ccw_circle_method.total
+
+                            # clockwise circle movement
+                            left_cw_new_loop = self.left_cw_circle_method.update(shoulder_xy=left_shoulder_xy,
+                                                                                 elbow_xy=left_elbow_xy,
+                                                                                 wrist_xy=left_wrist_xy, t_sec=t_sec)
+                            right_cw_new_loop = self.right_cw_circle_method.update(shoulder_xy=right_shoulder_xy,
+                                                                                   elbow_xy=right_elbow_xy,
+                                                                                   wrist_xy=right_wrist_xy, t_sec=t_sec)
+                            if left_cw_new_loop > 0:
+                                self.left_cw_circle_loop = self.left_cw_circle_method.total
+                            if right_cw_new_loop > 0:
+                                self.right_cw_circle_loop = self.right_cw_circle_method.total
+
                         self.recognize_frame_num += 1
                     else:
                         continue
-                    if len(this_frame["pose_landmarks"]) > 0:
-                        left_shoulder_xy = this_frame["pose_landmarks"][11][0:2]
-                        right_shoulder_xy = this_frame["pose_landmarks"][12][0:2]
-                        left_elbow_xy = this_frame["pose_landmarks"][13][0:2]
-                        right_elbow_xy = this_frame["pose_landmarks"][14][0:2]
-                        left_wrist_xy = this_frame["pose_landmarks"][15][0:2]
-                        right_wrist_xy = this_frame["pose_landmarks"][16][0:2]
-
-                        t_sec = time.time()
-                        # horizontal movement
-                        left_h_new_loop = self.left_horizontal_method.update(shoulder_xy=left_shoulder_xy, wrist_xy=left_wrist_xy, t_sec=t_sec)
-                        right_h_new_loop = self.right_horizontal_method.update(shoulder_xy=right_shoulder_xy, wrist_xy=right_wrist_xy, t_sec=t_sec)
-                        if left_h_new_loop > 0:
-                            self.left_horizontal_loop = self.left_horizontal_method.count
-                        if right_h_new_loop > 0:
-                            self.right_horizontal_loop = self.right_horizontal_method.count
-
-                        # vertical movement
-                        left_v_new_loop = self.left_vertical_method.update(shoulder_xy=left_shoulder_xy, wrist_xy=left_wrist_xy, t_sec=t_sec)
-                        right_v_new_loop =  self.right_vertical_method.update(shoulder_xy=right_shoulder_xy, wrist_xy=right_wrist_xy, t_sec=t_sec)
-                        if left_v_new_loop > 0:
-                            self.left_vertical_loop = self.left_vertical_method.count
-                        if right_v_new_loop > 0:
-                            self.right_vertical_loop = self.right_vertical_method.count
-
-                        # counter clockwise circle movement
-                        left_ccw_new_loop = self.left_ccw_circle_method.update(shoulder_xy=left_shoulder_xy, elbow_xy=left_elbow_xy, wrist_xy=left_wrist_xy, t_sec=t_sec)
-                        right_ccw_new_loop = self.right_ccw_circle_method.update(shoulder_xy=right_shoulder_xy, elbow_xy=right_elbow_xy, wrist_xy=right_wrist_xy, t_sec=t_sec)
-                        if left_ccw_new_loop > 0:
-                            self.left_ccw_circle_loop = self.left_ccw_circle_method.total
-                        if right_ccw_new_loop > 0:
-                            self.right_ccw_circle_loop = self.right_ccw_circle_method.total
-
-                        # clockwise circle movement
-                        left_cw_new_loop = self.left_cw_circle_method.update(shoulder_xy=left_shoulder_xy, elbow_xy=left_elbow_xy, wrist_xy=left_wrist_xy, t_sec=t_sec)
-                        right_cw_new_loop = self.right_cw_circle_method.update(shoulder_xy=right_shoulder_xy, elbow_xy=right_elbow_xy, wrist_xy=right_wrist_xy, t_sec=t_sec)
-                        if left_cw_new_loop > 0:
-                            self.left_cw_circle_loop = self.left_cw_circle_method.total
-                        if right_cw_new_loop > 0:
-                            self.right_cw_circle_loop = self.right_cw_circle_method.total
                 else:
                     time.sleep(0.001)
 
