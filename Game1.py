@@ -3,6 +3,7 @@ import time
 
 import Config
 from ui.Button import Button
+from HandAni import HandAni
 
 class Game1Scene:
     def __init__(self, screen, font, gesture):
@@ -13,12 +14,12 @@ class Game1Scene:
         self.next_scene = None
 
         self.hand_img = pygame.image.load(f"Assets/Image/Game1/hand.png").convert_alpha()
-
+        
         self.state = "BREAK"
         self.current_action_index = 0
         self.state_start_time  = time.time()
 
-        self.action_duration = 15.0 #動作時間
+        self.action_duration = 5.0 #動作時間
         self.break_duration = 5.0   #休息時間
         self.window_sec = 1.0       #檢測時長
         
@@ -27,9 +28,11 @@ class Game1Scene:
         self.score = 0
 
         self.frame_rect = pygame.Rect(0, 0, 320, 240) #鏡頭
-        self.enabled_action_indices = [4, 2]    #啟用動作組
+        self.enabled_action_indices = [2,4]    #啟用動作組
         self.action_sets = [
             {
+                "RHand": "HORIZONTAL",
+                "LHand": "HORIZONTAL",
                 "name": "雙手水平",
                 "check": lambda g, s: (
                     g["left_horizontal_loop"] > s["left_horizontal_loop"] and
@@ -37,6 +40,8 @@ class Game1Scene:
                 )
             },
             {
+                "RHand": "VERTICAL",
+                "LHand": "VERTICAL",
                 "name": "雙手垂直",
                 "check": lambda g, s: (
                     g["left_vertical_loop"] > s["left_vertical_loop"] and
@@ -44,6 +49,8 @@ class Game1Scene:
                 )
             },
             {
+                "RHand": "HORIZONTAL",
+                "LHand": "VERTICAL",
                 "name": "左垂直 + 右水平",
                 "check": lambda g, s: (
                     g["left_vertical_loop"] > s["left_vertical_loop"] and
@@ -51,6 +58,8 @@ class Game1Scene:
                 )
             },
             {
+                "RHand": "VERTICAL",
+                "LHand": "HORIZONTAL",
                 "name": "左水平 + 右垂直",
                 "check": lambda g, s: (
                     g["left_horizontal_loop"] > s["left_horizontal_loop"] and
@@ -58,6 +67,8 @@ class Game1Scene:
                 )
             },
             {
+                "RHand": "CW",
+                "LHand": "CCW",
                 "name": "左逆 + 右順",
                 "check": lambda g, s: (
                     g["left_ccw_circle"] > s["left_ccw_circle"] and
@@ -65,6 +76,8 @@ class Game1Scene:
                 )
             },
             {
+                "RHand": "CCW",
+                "LHand": "CCW",
                 "name": "左逆 + 右逆",
                 "check": lambda g, s: (
                     g["left_ccw_circle"] > s["left_ccw_circle"] and
@@ -72,6 +85,8 @@ class Game1Scene:
                 )
             },
             {
+                "RHand": "CCW",
+                "LHand": "CW",
                 "name": "左順 + 右逆",
                 "check": lambda g, s: (
                     g["left_cw_circle"] > s["left_cw_circle"] and
@@ -79,6 +94,8 @@ class Game1Scene:
                 )
             },
             {
+                "RHand": "CW",
+                "LHand": "CW",
                 "name": "左順 + 右順",
                 "check": lambda g, s: (
                     g["left_cw_circle"] > s["left_cw_circle"] and
@@ -86,18 +103,24 @@ class Game1Scene:
                 )
             }
         ]
+        self.Lhand_ani = HandAni(image=self.hand_img,mode=self.action_sets[self.enabled_action_indices[0]]["LHand"],start_pos=(400, 400),period=2.0)
+        self.Rhand_ani = HandAni(image=self.hand_img,mode=self.action_sets[self.enabled_action_indices[0]]["RHand"],start_pos=(1000, 400),period=2.0)
+
     def handle_event(self, event):
         pass
 
     def update(self):
         self.update_data()
         self.main()
+        self.Lhand_ani.update()
+        self.Rhand_ani.update()
         pass
 
     def draw(self):
         self.screen.fill((40, 40, 40))
-        self.screen.blit(self.hand_img, (360, 200))
         self.draw_ui()
+        self.Lhand_ani.draw(self.screen)
+        self.Rhand_ani.draw(self.screen)
         self.draw_camera()
     
     def update_data(self):
@@ -149,6 +172,8 @@ class Game1Scene:
             if self.current_action_index == 0:
                 self.state = "STOP"
                 return
+            self.Lhand_ani.mode = self.action_sets[self.enabled_action_indices[self.current_action_index]]["LHand"]
+            self.Rhand_ani.mode = self.action_sets[self.enabled_action_indices[self.current_action_index]]["RHand"]
             self.state = "BREAK"
             self.state_start_time = now
             self.window_start_time = None
