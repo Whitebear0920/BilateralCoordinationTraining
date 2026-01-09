@@ -2,20 +2,19 @@ import pygame
 import time
 
 import Config
-from ui.Button import Button
 from HandAni import HandAni
+from AssetsManager import AssetsManager
 
 class Game1Scene:
-    def __init__(self, screen, font, gesture):
+    def __init__(self, screen, gesture):
         self.screen = screen
         self.next_scene = None
-        self.font = font
         self.gesture = gesture
         self.next_scene = None
 
-        self.hand_img = pygame.image.load(f"Assets/Image/Game1/hand.png").convert_alpha()
-        self.hand_img = pygame.transform.scale(self.hand_img,(100,100))
-        self.score_sfx = pygame.mixer.Sound(f"Assets/Sound/coin.wav")
+        self.font = AssetsManager.get_font("main")
+        self.hand_img = AssetsManager.get_image("hand",(100,100))
+        self.score_sfx = AssetsManager.get_sound("coin")
         
         self.state = "BREAK"
         self.current_action_index = 0

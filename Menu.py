@@ -1,13 +1,13 @@
 import pygame
 import Config
 from ui.Button import Button
-
+from AssetsManager import AssetsManager
 
 class MenuScene:
-    def __init__(self, screen, button_font):
+    def __init__(self, screen):
         self.screen = screen
         self.next_scene = None
-        self.button_font = button_font
+        self.button_font = AssetsManager.get_font("main")
         self.btn_a = Button("遊戲 1", 0, 0, 200, 60, self.button_font)
         self.btn_b = Button("遊戲 2", 0, 0, 200, 60, self.button_font)
         self.btn_c = Button("離開", 0, 0, 200, 60, self.button_font)
