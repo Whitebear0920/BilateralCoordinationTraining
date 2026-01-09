@@ -1,9 +1,9 @@
 import time
 import math
-
+import pygame
 class HandAni:
     def __init__(self, image, mode, start_pos, period,
-                 amplitude=100, radius=160):
+                 amplitude=280, radius=320):
         """
         image: pygame.Surface
         mode: 'VERTICAL', 'HORIZONTAL', 'CW', 'CCW'
@@ -11,8 +11,10 @@ class HandAni:
         period: 完成一次循環所需秒數
         """
         self.image = image
+        self.rect = image.get_rect(center=start_pos)
+        self.origin = pygame.Vector2(self.rect.center)
         self.mode = mode
-        self.base_x, self.base_y = start_pos
+        self.base_x, self.base_y = self.origin
         self.period = period
 
         self.amplitude = amplitude
@@ -41,12 +43,13 @@ class HandAni:
             self.y = self.base_y
 
         elif self.mode == "CCW":
-            self.x = self.base_x + self.radius * math.cos(-phase)
-            self.y = self.base_y + self.radius * math.sin(-phase)
+            self.x = self.base_x - self.radius * math.cos(phase)
+            self.y = self.base_y + self.radius * math.sin(phase)
 
         elif self.mode == "CW":
             self.x = self.base_x + self.radius * math.cos(phase)
             self.y = self.base_y + self.radius * math.sin(phase)
+        self.rect.center = (self.x, self.y)
 
     def draw(self, screen):
-        screen.blit(self.image, (self.x, self.y))
+        screen.blit(self.image, self.rect)

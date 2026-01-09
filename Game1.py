@@ -14,6 +14,7 @@ class Game1Scene:
         self.next_scene = None
 
         self.hand_img = pygame.image.load(f"Assets/Image/Game1/hand.png").convert_alpha()
+        self.hand_img = pygame.transform.scale(self.hand_img,(100,100))
         self.score_sfx = pygame.mixer.Sound(f"Assets/Sound/coin.wav")
         
         self.state = "BREAK"
@@ -29,7 +30,7 @@ class Game1Scene:
         self.score = 0
 
         self.frame_rect = pygame.Rect(0, 0, 320, 240) #鏡頭
-        self.enabled_action_indices = [2,4]    #啟用動作組
+        self.enabled_action_indices = [4,5,2,4]    #啟用動作組
         self.action_sets = [
             {#0
                 "RHand": "HORIZONTAL",
@@ -104,8 +105,8 @@ class Game1Scene:
                 )
             }
         ]
-        self.Lhand_ani = HandAni(image=self.hand_img,mode=self.action_sets[self.enabled_action_indices[0]]["LHand"],start_pos=(400, 400),period=2.0)
-        self.Rhand_ani = HandAni(image=self.hand_img,mode=self.action_sets[self.enabled_action_indices[0]]["RHand"],start_pos=(1000, 400),period=2.0)
+        self.Lhand_ani = HandAni(image=self.hand_img,mode=self.action_sets[self.enabled_action_indices[0]]["LHand"],start_pos=(Config.WIDTH//2-500, Config.HEIGHT//2),period=2.0)
+        self.Rhand_ani = HandAni(image=self.hand_img,mode=self.action_sets[self.enabled_action_indices[0]]["RHand"],start_pos=(Config.WIDTH//2+500, Config.HEIGHT//2),period=2.0)
 
     def handle_event(self, event):
         pass
@@ -123,7 +124,8 @@ class Game1Scene:
         self.Lhand_ani.draw(self.screen)
         self.Rhand_ani.draw(self.screen)
         self.draw_camera()
-    
+        pygame.draw.rect(self.screen,Config.GREEN,(Config.WIDTH//2-500, Config.HEIGHT//2,5,5))
+        pygame.draw.rect(self.screen,Config.GREEN,(Config.WIDTH//2+500, Config.HEIGHT//2,5,5))
     def update_data(self):
         temp = self.gesture()
         self.last_snapshot = {
