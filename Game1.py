@@ -20,8 +20,8 @@ class Game1Scene:
         self.current_action_index = 0
         self.state_start_time  = time.time()
 
-        self.action_duration = 10.0 #動作時間
-        self.break_duration = 5.0   #休息時間
+        self.action_duration = 2.0 #動作時間
+        self.break_duration = 2.0   #休息時間
         self.window_sec = 1.0       #檢測時長
         
         self.window_start_time = None
@@ -29,7 +29,7 @@ class Game1Scene:
         self.score = 0
 
         self.frame_rect = pygame.Rect(0, 0, 320, 240) #鏡頭
-        self.enabled_action_indices = [4,5,2,4]    #啟用動作組
+        self.enabled_action_indices = [4]    #啟用動作組
         self.action_sets = [
             {#0
                 "RHand": "HORIZONTAL",
@@ -125,6 +125,7 @@ class Game1Scene:
         self.draw_camera()
         pygame.draw.rect(self.screen,Config.GREEN,(Config.WIDTH//2-500, Config.HEIGHT//2,5,5))
         pygame.draw.rect(self.screen,Config.GREEN,(Config.WIDTH//2+500, Config.HEIGHT//2,5,5))
+
     def update_data(self):
         temp = self.gesture()
         self.last_snapshot = {
@@ -155,7 +156,13 @@ class Game1Scene:
             return
         
         if self.state == "STOP":
-            self.next_scene = "Menu"
+            self.next_scene = {
+                "name": "Result",
+                "data": {
+                    "score": self.score,
+                }
+            }
+
             return
         pass
     
@@ -225,8 +232,8 @@ class Game1Scene:
 
             # ===== 分數 =====
             self.draw_text(f"分數：{self.score}", 360, 160, (255, 200, 50))
-        else:
-            self.draw_text(f"最後得分：{self.score}",Config.WIDTH//2,Config.HEIGHT//2)
+        #else:
+        #    self.draw_text(f"最後得分：{self.score}",Config.WIDTH//2,Config.HEIGHT//2)
     def draw_text(self, text, x, y, color=(255,255,255)):
         surf = self.font.render(text, True, color)
         self.screen.blit(surf, (x, y))
