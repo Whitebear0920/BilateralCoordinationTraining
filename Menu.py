@@ -18,11 +18,11 @@ class MenuScene:
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.btn_a.is_clicked(event):
-                self.next_scene = "Game1"
+                self.next_scene = {"name":"Game1"}
             elif self.btn_b.is_clicked(event):
-                self.next_scene = "Game2"
+                self.next_scene = {"name":"Game2"}
             elif self.btn_c.is_clicked(event):
-                self.next_scene = "Exit"
+                self.next_scene = {"name":"Exit"}
 
     def update(self):
         pass

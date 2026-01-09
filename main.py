@@ -3,6 +3,7 @@ import Config
 
 from Menu import MenuScene
 from Game1 import Game1Scene
+from Game1Result import Game1Result
 
 from GestureManager import GestureManager
 from AssetsManager import AssetsManager
@@ -29,19 +30,23 @@ def main():
             current.handle_event(event)
 
         #Scene switch
-        if hasattr(current, "next_scene") and current.next_scene:
-            if current.next_scene == "Game1":
+        if isinstance(current.next_scene, dict):
+            if current.next_scene["name"] == "Game1":
                 gesture_mgr.start()
                 current = Game1Scene(screen, gesture_mgr.api)
                 print("Game1")
-            elif current.next_scene == "Game2":
+            elif current.next_scene["name"] == "Result":
+                gesture_mgr.stop()
+                current = Game1Result(screen, current.next_scene["data"])
+                print("Result")
+            elif current.next_scene["name"] == "Game2":
                 gesture_mgr.stop()
                 print("Game2")
-            elif current.next_scene == "Menu":
+            elif current.next_scene["name"] == "Menu":
                 gesture_mgr.stop()
                 current = menu
                 print("Menu")
-            elif current.next_scene == "Exit":
+            elif current.next_scene["name"] == "Exit":
                 gesture_mgr.stop()
                 print("Exit")
                 break
