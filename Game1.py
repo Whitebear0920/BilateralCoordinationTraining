@@ -20,8 +20,8 @@ class Game1Scene:
         self.current_action_index = 0
         self.state_start_time  = time.time()
 
-        self.action_duration = 2.0 #動作時間
-        self.break_duration = 2.0   #休息時間
+        self.action_duration = 30.0 #動作時間
+        self.break_duration = 10.0   #休息時間
         self.window_sec = 1.0       #檢測時長
         
         self.window_start_time = None
@@ -29,7 +29,7 @@ class Game1Scene:
         self.score = 0
 
         self.frame_rect = pygame.Rect(0, 0, 320, 240) #鏡頭
-        self.enabled_action_indices = [4]    #啟用動作組
+        self.enabled_action_indices = [2,4,6]    #啟用動作組
         self.action_sets = [
             {#0
                 "RHand": "HORIZONTAL",
