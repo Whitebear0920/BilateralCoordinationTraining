@@ -5,16 +5,20 @@ from Menu import MenuScene
 from Game1 import Game1Scene
 
 from GestureManager import GestureManager
+from AssetsManager import AssetsManager
+
 def main():
     gesture_mgr = GestureManager()
 
     pygame.init()
+    pygame.mixer.init()
     screen = pygame.display.set_mode((Config.WIDTH, Config.HEIGHT))
     clock = pygame.time.Clock()
 
-    font = pygame.font.Font("font/msjh.ttc", 36)
-    print(font)
-    menu = MenuScene(screen,font)
+    AssetsManager.preload()
+
+    #font = pygame.font.Font("font/msjh.ttc", 36)
+    menu = MenuScene(screen)
     current = menu
 
     running = True
@@ -28,7 +32,7 @@ def main():
         if hasattr(current, "next_scene") and current.next_scene:
             if current.next_scene == "Game1":
                 gesture_mgr.start()
-                current = Game1Scene(screen, font, gesture_mgr.api)
+                current = Game1Scene(screen, gesture_mgr.api)
                 print("Game1")
             elif current.next_scene == "Game2":
                 gesture_mgr.stop()
