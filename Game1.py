@@ -315,6 +315,7 @@ class Game1Scene:
             return
         frame = frame.copy()
         frame = frame[:, :, ::-1]
+        frame = frame[:, ::-1, :]
         surface = pygame.surfarray.make_surface(frame.swapaxes(0, 1))
         surface = pygame.transform.scale(surface,(self.frame_rect.width, self.frame_rect.height))
         self.screen.blit(surface, self.frame_rect)
