@@ -1,4 +1,5 @@
 import os
+import sys
 import cv2
 import multiprocessing as mp
 mp.set_start_method("spawn", force=True)
@@ -142,26 +143,40 @@ class MDP_MUL_PROCE:
         self._collector_lock = threading.Lock()
 
     # ========== Model 初始化 ==========
+    def resource_path(self, rel_path: str) -> str:
+        """
+        PyInstaller onefile 會把資料解到 sys._MEIPASS
+        開發環境則用專案目錄
+        """
+        if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+            base = sys._MEIPASS
+        else:
+            base = os.path.dirname(os.path.abspath(__file__))  # 或 main.py 的所在目錄
+        return os.path.join(base, rel_path)
+
     def pose_init(self):
-        model_path = os.path.join(self.MODEL_ROOT_PATH, "pose_landmarker_full.task")
+        model_path = self.resource_path(os.path.join("model", "pose_landmarker_full.task"))
         if not os.path.exists(model_path):
             raise ValueError(f"The {model_path} does not exist. Please check 'Pose' model.")
         self.model_kind = "pose"
         self.model_path = model_path
+        print("Model Loaded!!")
 
     def face_init(self):
-        model_path = os.path.join(self.MODEL_ROOT_PATH, "face_landmarker.task")
+        model_path = self.resource_path(os.path.join("model", "face_landmarker.task"))
         if not os.path.exists(model_path):
             raise ValueError(f"The {model_path} does not exist. Please check 'Face' model.")
         self.model_kind = "face"
         self.model_path = model_path
+        print("Model Loaded!!")
 
     def hands_init(self):
-        model_path = os.path.join(self.MODEL_ROOT_PATH, "hand_landmarker.task")
+        model_path = self.resource_path(os.path.join("model", "hand_landmarker.task"))
         if not os.path.exists(model_path):
             raise ValueError(f"The {model_path} does not exist. Please check 'Hand' model.")
         self.model_kind = "hands"
         self.model_path = model_path
+        print("Model Loaded!!")
 
     # ========== Worker 管理 ==========
     def _start_workers_if_needed(self):
@@ -181,6 +196,7 @@ class MDP_MUL_PROCE:
             )
             p.start()
             self.workers.append(p)
+        print("Mediapipe Worker Start")
 
     def _start_collector_if_needed(self):
         if self._collector_thread is not None and self._collector_thread.is_alive():
