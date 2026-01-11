@@ -1,6 +1,7 @@
 import pygame
 import os
-
+from VideoPlayer import VideoPlayer
+import Config
 class AssetsManager:
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     ASSETS_DIR = os.path.join(BASE_DIR, "Assets")
@@ -8,6 +9,7 @@ class AssetsManager:
     images = {}
     sounds = {}
     fonts  = {}
+    videos = {}
 
     # ========= pre =========
     @classmethod
@@ -22,6 +24,15 @@ class AssetsManager:
 
         # ---- Fonts ----
         cls._load_font("main", "Font/msjh.ttc", 36)
+
+        # ---- Video ----
+        cls._load_video("CCWCCW", "Video/CCWCCW.mov", size=(960,540), loop=True)
+        cls._load_video("CCWCW", "Video/CCWCW.mov", size=(960,540), loop=True)
+        cls._load_video("CWCCW", "Video/CWCCW.mov", size=(960,540), loop=True)
+        cls._load_video("CWCW", "Video/CWCW.mov", size=(960,540), loop=True)
+        cls._load_video("VH", "Video/VH.mp4", size=(960,540), loop=True)
+        cls._load_video("HV", "Video/VH.mp4", size=(960,540), loop=True)
+
 
         print("[Assets] Preload finished.")
 
@@ -74,3 +85,16 @@ class AssetsManager:
     @classmethod
     def get_font(cls, key):
         return cls.fonts[key]
+
+    # ========= Video =========
+    @classmethod
+    def _load_video(cls, key, path, size, loop=False):
+        full = os.path.join(cls.ASSETS_DIR, path)
+        if not os.path.exists(full):
+            raise FileNotFoundError(f"Video not found: {full}")
+
+        cls.videos[key] = VideoPlayer(full, size, loop)
+    
+    @classmethod
+    def get_video(cls, key):
+        return cls.videos[key]
