@@ -17,7 +17,7 @@ class Game1Scene:
         self.state_start_time  = time.time()
 
         self.video_duration = 5.0      #影片時間
-        self.train_duration = 5.0      #練習時間
+        self.train_duration = 10.0      #練習時間
         self.action_duration = 5.0     #動作時間
         self.break_duration = 5.0      #休息時間
         self.window_sec = 1.0           #檢測時長
@@ -27,7 +27,7 @@ class Game1Scene:
         self.score = 0
 
         self.frame_rect = pygame.Rect(0, 0, 320, 240) #鏡頭
-        self.enabled_action_indices = [4,4,6]    #啟用動作組
+        self.enabled_action_indices = [2,4,6]    #啟用動作組
         self.action_sets = [
             {#0
                 "Video": "HH",
@@ -244,6 +244,7 @@ class Game1Scene:
                 return
             self.Lhand_ani.mode = self.action_sets[self.enabled_action_indices[self.current_action_index]]["LHand"]
             self.Rhand_ani.mode = self.action_sets[self.enabled_action_indices[self.current_action_index]]["RHand"]
+            self.video = AssetsManager.get_video(self.action_sets[self.enabled_action_indices[self.current_action_index]]["Video"])
             self.state = "BREAK"
             self.state_start_time = now
             self.window_start_time = None

@@ -29,6 +29,7 @@ class VideoPlayer:
                 return
 
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        frame = cv2.flip(frame, 1)
         frame = np.rot90(frame)
         surface = pygame.surfarray.make_surface(frame)
         self.surface = pygame.transform.scale(surface, self.size)

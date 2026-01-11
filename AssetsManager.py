@@ -31,6 +31,8 @@ class AssetsManager:
         cls._load_video("CWCCW", "Video/CWCCW.mov", size=(960,540), loop=True)
         cls._load_video("CWCW", "Video/CWCW.mov", size=(960,540), loop=True)
         cls._load_video("HCCW", "Video/HCCW.mov", size=(960,540), loop=True)
+        cls._load_video("VH", "Video/VH.mp4", size=(960,540), loop=True)
+        cls._load_video("VS", "Video/VS.mov", size=(960,540), loop=True)
 
 
         print("[Assets] Preload finished.")
