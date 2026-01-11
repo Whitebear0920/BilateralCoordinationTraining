@@ -16,10 +16,10 @@ class Game1Scene:
         self.current_action_index = 0
         self.state_start_time  = time.time()
 
-        self.video_duration = 5.0      #影片時間
-        self.train_duration = 10.0      #練習時間
-        self.action_duration = 5.0     #動作時間
-        self.break_duration = 5.0      #休息時間
+        self.video_duration = 20.0      #影片時間
+        self.train_duration = 15.0      #練習時間
+        self.action_duration = 30.0     #動作時間
+        self.break_duration = 15.0      #休息時間
         self.window_sec = 1.0           #檢測時長
         
         self.window_start_time = None
@@ -30,7 +30,7 @@ class Game1Scene:
         self.enabled_action_indices = [2,4,6]    #啟用動作組
         self.action_sets = [
             {#0
-                "Video": "HH",
+                "Video": "VH",
                 "RHand": "HORIZONTAL",
                 "LHand": "HORIZONTAL",
                 "name": "雙手水平",
@@ -40,7 +40,7 @@ class Game1Scene:
                 )
             },
             {#1
-                "Video": "VV",
+                "Video": "HV",
                 "RHand": "VERTICAL",
                 "LHand": "VERTICAL",
                 "name": "雙手垂直",
