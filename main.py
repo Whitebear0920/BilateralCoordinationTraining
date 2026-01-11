@@ -8,6 +8,8 @@ from Game1Result import Game1Result
 from GestureManager import GestureManager
 from AssetsManager import AssetsManager
 
+import multiprocessing as mp
+
 def main():
     gesture_mgr = GestureManager()
 
@@ -61,4 +63,6 @@ def main():
     pygame.quit()
 
 if __name__ == "__main__":
+    mp.freeze_support()
+
     main()

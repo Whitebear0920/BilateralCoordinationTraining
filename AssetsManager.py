@@ -4,7 +4,7 @@ from VideoPlayer import VideoPlayer
 import Config
 class AssetsManager:
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    ASSETS_DIR = os.path.join(BASE_DIR, "Assets")
+    ASSETS_DIR = "Assets"
 
     images = {}
     sounds = {}
