@@ -3,11 +3,11 @@ import pygame
 import numpy as np
 
 class VideoPlayer:
-    def __init__(self, path, size, loop=False):
+    def __init__(self, path, size, loop=False, flip_x=True):
         self.cap = cv2.VideoCapture(path)
         if not self.cap.isOpened():
             raise FileNotFoundError(f"Video not found: {path}")
-
+        self.flip_x = flip_x
         self.fps = self.cap.get(cv2.CAP_PROP_FPS) or 30
         self.size = size
         self.loop = loop
@@ -29,7 +29,8 @@ class VideoPlayer:
                 return
 
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        frame = cv2.flip(frame, 1)
+        if self.flip_x:
+            frame = cv2.flip(frame, 1)
         frame = np.rot90(frame)
         surface = pygame.surfarray.make_surface(frame)
         self.surface = pygame.transform.scale(surface, self.size)
