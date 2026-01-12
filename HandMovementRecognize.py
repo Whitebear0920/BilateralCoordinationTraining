@@ -10,29 +10,46 @@ class HandMovementRecognize:
     # 結果判斷
     # 提供結果
 
-    def __init__(self):
+    def __init__(self, game):
         # variable
-        self.run_flag = False
+        self.run_flag = False # camera 控制
         self.threading_list = []
         self.frame_lock = threading.Lock()
         self.now_frame = None
+        self.game = game
         # open camera
         self.camera_and_mdpp_inst = self.CameraAndMDPPControl(self)
-        # open recognize pipeline
-        self.movement_recognize = self.MovementRecognize(self)
+        if self.game == "Game1":
+            # open recognize pipeline
+            self.movement_recognize = self.MovementRecognize(self)
+        elif self.game == "Game2":
+            self.hand_position_recognize = self.HandPositionRecognize(self)
+        else:
+            raise Exception("Unknown game type.")
 
     def external_api(self):
-        return {
-            "now_frame" : self.now_frame,
-            "left_ccw_circle":self.movement_recognize.left_ccw_circle_loop, "right_ccw_circle":self.movement_recognize.right_ccw_circle_loop,
-            "left_cw_circle": self.movement_recognize.left_cw_circle_loop, "right_cw_circle": self.movement_recognize.right_cw_circle_loop,
-            "left_vertical_loop":self.movement_recognize.left_vertical_loop, "right_vertical_loop":self.movement_recognize.right_vertical_loop,
-            "left_horizontal_loop":self.movement_recognize.left_horizontal_loop, "right_horizontal_loop":self.movement_recognize.right_horizontal_loop,
-        }
+        with self.frame_lock:
+            frame = None if self.now_frame is None else self.now_frame.copy()
+        if self.game == "Game1":
+            return {
+                "now_frame" : frame,
+                "left_ccw_circle":self.movement_recognize.left_ccw_circle_loop, "right_ccw_circle":self.movement_recognize.right_ccw_circle_loop,
+                "left_cw_circle": self.movement_recognize.left_cw_circle_loop, "right_cw_circle": self.movement_recognize.right_cw_circle_loop,
+                "left_vertical_loop":self.movement_recognize.left_vertical_loop, "right_vertical_loop":self.movement_recognize.right_vertical_loop,
+                "left_horizontal_loop":self.movement_recognize.left_horizontal_loop, "right_horizontal_loop":self.movement_recognize.right_horizontal_loop,
+            }
+        elif self.game == "Game2":
+            return {
+                "now_frame" : frame,
+                "wrist_coordinate" : self.hand_position_recognize.get_new_data()
+            }
 
     def clear(self):
         self.camera_and_mdpp_inst.camera_stop()
-        self.movement_recognize.clear_movement_recognize()
+        if self.game == "Game1":
+            self.movement_recognize.clear_movement_recognize()
+        elif self.game == "Game2":
+            self.hand_position_recognize.clear_hand_position_recognize()
         if self.camera_and_mdpp_inst is not None:
             self.camera_and_mdpp_inst.mdpp.clear()
 
@@ -207,20 +224,77 @@ class HandMovementRecognize:
         def clear_movement_recognize(self):
             self.clear_flag = True
 
+    class HandPositionRecognize:
+        def __init__(self, hmr):
+            self.hmr = hmr
+            self.clear_flag = False
+            self.left_wrist_coordinate = {}
+            self.right_wrist_coordinate = {}
+
+            self.data_lock = threading.Lock()
+
+            self.recognize_frame_num = 0
+            self.taken_frame_count = 0
+
+            self.hand_position_recognize_main()
+
+        def clear_hand_position_recognize(self):
+            self.clear_flag = True
+
+        def get_new_data(self):
+            with self.data_lock:
+                idx = self.taken_frame_count
+                if idx < self.recognize_frame_num:
+                    l = self.left_wrist_coordinate.get(idx)
+                    r = self.right_wrist_coordinate.get(idx)
+                    if l is None or r is None:
+                        # 該 frame 沒 landmarks 或尚未寫入完成，先不取
+                        return {}
+                    self.taken_frame_count += 1
+                    return {"Left": l, "Right": r}
+            return {}
+
+        def hand_keep_tracking(self):
+            while True:
+                if self.clear_flag:
+                    break
+                if self.hmr.run_flag:
+                    this_frame = self.hmr.camera_and_mdpp_inst.mdpp.get_result(self.recognize_frame_num)
+                    if this_frame is not None:
+                        if len(this_frame["pose_landmarks"]) > 0:
+                            left = this_frame["pose_landmarks"][15][:2]
+                            right = this_frame["pose_landmarks"][16][:2]
+                        else:
+                            left = None
+                            right = None
+                        with self.data_lock:
+                            self.left_wrist_coordinate[self.recognize_frame_num] = left
+                            self.right_wrist_coordinate[self.recognize_frame_num] = right
+                            self.recognize_frame_num += 1
+                        print(f"recognize_frame_num: {self.recognize_frame_num}")
+                    else:
+                        time.sleep(0.001)
+                else:
+                    time.sleep(0.001)
+
+        def hand_position_recognize_main(self):
+            t = threading.Thread(target=self.hand_keep_tracking, daemon=True)
+            t.start()
+            self.hmr.threading_list.append(t)
+
 if __name__ == "__main__":
-    hm = HandMovementRecognize()
+    hm = HandMovementRecognize("Game2")
     hm.camera_and_mdpp_inst.run_mediapipe()
     hm.camera_and_mdpp_inst.camera_start()
     try:
         while True:
-            if hm.now_frame is not None:
-                with hm.frame_lock:
-                    frame = None if hm.now_frame is None else hm.now_frame.copy()
-                cv2.imshow("test",frame)
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    break
-            else:
-                time.sleep(0.001)
+            # 這裡會自動「阻塞」等待，直到 MediaPipe 出結果
+            # 不再需要 time.sleep(0.001)
+            data = hm.external_api()
+
+            wrist_coords = data.get("wrist_coordinate")
+            if wrist_coords:  # 檢查是否非空
+                print(f"Left Wrist: {wrist_coords['Left']}")
     finally:
         hm.clear()
         cv2.destroyAllWindows()
