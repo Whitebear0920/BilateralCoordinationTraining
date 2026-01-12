@@ -17,9 +17,9 @@ class Game1Scene:
         self.state_start_time  = time.time()
 
         self.video_duration = 20.0      #影片時間
-        self.train_duration = 15.0      #練習時間
-        self.action_duration = 30.0     #動作時間
-        self.break_duration = 15.0      #休息時間
+        self.train_duration = 30.0      #練習時間
+        self.action_duration = 100.0     #動作時間
+        self.break_duration = 30.0      #休息時間
         self.window_sec = 1.0           #檢測時長
         
         self.window_start_time = None
