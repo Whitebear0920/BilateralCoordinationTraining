@@ -27,10 +27,10 @@ class Game1Scene:
         self.score = 0
 
         self.frame_rect = pygame.Rect(0, 0, 320, 240) #鏡頭
-        self.enabled_action_indices = [2,4,6]    #啟用動作組
+        self.enabled_action_indices = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]    #啟用動作組
         self.action_sets = [
             {#0
-                "Video": "VH",
+                "Video": "HH",
                 "RHand": "HORIZONTAL",
                 "LHand": "HORIZONTAL",
                 "name": "雙手水平",
@@ -40,7 +40,7 @@ class Game1Scene:
                 )
             },
             {#1
-                "Video": "HV",
+                "Video": "VV",
                 "RHand": "VERTICAL",
                 "LHand": "VERTICAL",
                 "name": "雙手垂直",
@@ -108,7 +108,87 @@ class Game1Scene:
                     g["left_cw_circle"] > s["left_cw_circle"] and
                     g["right_cw_circle"] > s["right_cw_circle"]
                 )
-            }
+            },
+            {#8
+                "Video": "VCW",
+                "RHand": "CW",
+                "LHand": "VERTICAL",
+                "name": "左垂直 + 右順",
+                "check": lambda g, s: (
+                    g["left_vertical_loop"] > s["left_vertical_loop"] and
+                    g["right_cw_circle"] > s["right_cw_circle"]
+                )
+            },
+            {#9
+                "Video": "VCCW",
+                "RHand": "CCW",
+                "LHand": "VERTICAL",
+                "name": "左垂直 + 右逆",
+                "check": lambda g, s: (
+                    g["left_vertical_loop"] > s["left_vertical_loop"] and
+                    g["right_ccw_circle"] > s["right_ccw_circle"]
+                )
+            },
+            {#10
+                "Video": "CCWV",
+                "RHand": "VERTICAL",
+                "LHand": "CCW",
+                "name": "左逆 + 右垂直",
+                "check": lambda g, s: (
+                    g["left_ccw_circle"] > s["left_ccw_circle"] and
+                    g["right_vertical_loop"] > s["right_vertical_loop"]
+                )
+            },
+            {#11
+                "Video": "CWV",
+                "RHand": "CW",
+                "LHand": "VERTICAL",
+                "name": "左順 + 右垂直",
+                "check": lambda g, s: (
+                    g["left_cw_circle"] > s["left_cw_circle"] and
+                    g["right_vertical_loop"] > s["right_vertical_loop"]
+                )
+            },
+            {#12
+                "Video": "HCCW",
+                "RHand": "CCW",
+                "LHand": "HORIZONTAL",
+                "name": "左水平 + 右逆",
+                "check": lambda g, s: (
+                    g["left_horizontal_loop"] > s["left_horizontal_loop"] and
+                    g["right_ccw_circle"] > s["right_ccw_circle"]
+                )
+            },
+            {#13
+                "Video": "CWH",
+                "RHand": "HORIZONTAL",
+                "LHand": "CW",
+                "name": "左順 + 右水平",
+                "check": lambda g, s: (
+                    g["left_cw_circle"] > s["left_cw_circle"] and
+                    g["right_horizontal_loop"] > s["right_horizontal_loop"]
+                )
+            },
+            {#14
+                "Video": "HCW",
+                "RHand": "CW",
+                "LHand": "HORIZONTAL",
+                "name": "左水平 + 右順",
+                "check": lambda g, s: (
+                    g["left_horizontal_loop"] > s["left_horizontal_loop"] and
+                    g["right_cw_circle"] > s["right_cw_circle"]
+                )
+            },
+            {#15
+                "Video": "CCWH",
+                "RHand": "HORIZONTAL",
+                "LHand": "CCW",
+                "name": "左逆 + 右水平",
+                "check": lambda g, s: (
+                    g["left_ccw_circle"] > s["left_ccw_circle"] and
+                    g["right_horizontal_loop"] > s["right_horizontal_loop"]
+                )
+            },
         ]
         
         self.font = AssetsManager.get_font("main")
