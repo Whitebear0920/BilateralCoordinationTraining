@@ -31,9 +31,17 @@ class AssetsManager:
         cls._load_video("CWCCW", "Video/CWCCW.mov", size=(960,540), loop=True)
         cls._load_video("CWCW", "Video/CWCW.mov", size=(960,540), loop=True)
         cls._load_video("VH", "Video/VH.mp4", size=(960,540), loop=True)
-        cls._load_video("HV", "Video/VH.mp4", size=(960,540), loop=True)
-
-
+        cls._load_video("HV", "Video/VH.mp4", size=(960,540), loop=True, flip_x=False)
+        cls._load_video("VCW", "Video/VCW.mp4", size=(960,540), loop=True)
+        cls._load_video("VCCW", "Video/VCCW.mp4", size=(960,540), loop=True)
+        cls._load_video("HCCW", "Video/HCCW.mp4", size=(960,540), loop=True)
+        cls._load_video("CCWV", "Video/VCW.mp4", size=(960,540), loop=True, flip_x=False)
+        cls._load_video("CWV", "Video/VCCW.mp4", size=(960,540), loop=True, flip_x=False)
+        cls._load_video("CWH", "Video/HCCW.mp4", size=(960,540), loop=True, flip_x=False)
+        cls._load_video("HH", "Video/HH.mp4", size=(960,540), loop=True)
+        cls._load_video("VV", "Video/VV.mp4", size=(960,540), loop=True)
+        cls._load_video("HCW", "Video/HCW.mp4", size=(960,540), loop=True)
+        cls._load_video("CCWH", "Video/CCWH.mp4", size=(960,540), loop=True, flip_x=False)
         print("[Assets] Preload finished.")
 
     # ========= Image =========
@@ -88,12 +96,12 @@ class AssetsManager:
 
     # ========= Video =========
     @classmethod
-    def _load_video(cls, key, path, size, loop=False):
+    def _load_video(cls, key, path, size, loop=False, flip_x=True):
         full = os.path.join(cls.ASSETS_DIR, path)
         if not os.path.exists(full):
             raise FileNotFoundError(f"Video not found: {full}")
 
-        cls.videos[key] = VideoPlayer(full, size, loop)
+        cls.videos[key] = VideoPlayer(full, size, loop, flip_x)
     
     @classmethod
     def get_video(cls, key):
