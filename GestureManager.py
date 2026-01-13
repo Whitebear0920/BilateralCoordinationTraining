@@ -4,9 +4,9 @@ class GestureManager:
         self.hm = None
         self.api = None
 
-    def start(self):
+    def start(self,game):
         if self.hm is None:
-            self.hm = HandMovementRecognize()
+            self.hm = HandMovementRecognize(game)
             self.hm.camera_and_mdpp_inst.run_mediapipe()
             self.hm.camera_and_mdpp_inst.camera_start()
             self.api = self.hm.external_api

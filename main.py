@@ -34,7 +34,7 @@ def main():
         #Scene switch
         if isinstance(current.next_scene, dict):
             if current.next_scene["name"] == "Game1":
-                gesture_mgr.start()
+                gesture_mgr.start("Game1")
                 current = Game1Scene(screen, gesture_mgr.api)
                 print("Game1")
             elif current.next_scene["name"] == "Result":

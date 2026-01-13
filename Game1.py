@@ -12,22 +12,22 @@ class Game1Scene:
         self.gesture = gesture
         self.next_scene = None
         
-        self.state = "BREAK"
+        self.state = "ACTION"
         self.current_action_index = 0
         self.state_start_time  = time.time()
 
         self.video_duration = 20.0      #影片時間
-        self.train_duration = 30.0      #練習時間
-        self.action_duration = 100.0     #動作時間
-        self.break_duration = 30.0      #休息時間
+        self.train_duration = 20.0      #練習時間
+        self.action_duration = 30.0     #動作時間
+        self.break_duration = 20.0      #休息時間
         self.window_sec = 1.0           #檢測時長
         
         self.window_start_time = None
         self.window_snapshot = None
         self.score = 0
 
-        self.frame_rect = pygame.Rect(0, 0, 320, 240) #鏡頭
-        self.enabled_action_indices = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]    #啟用動作組
+        self.frame_rect = pygame.Rect(0, 0, 640, 480) #鏡頭
+        self.enabled_action_indices = [2,3,4,5,6,7,8,9,10,11,12,13]    #啟用動作組
         self.action_sets = [
             {#0
                 "Video": "HH",
@@ -360,29 +360,29 @@ class Game1Scene:
         # ===== 目前動作 =====
         action = self.action_sets[self.enabled_action_indices[self.current_action_index]]
         if self.state != "STOP":
-            self.draw_text(f"動作：{action['name']}", 360, 40)
+            self.draw_text(f"動作：{action['name']}", 700, 40)
 
             # ===== 狀態 + 倒數 =====
             if self.state == "ACTION":
                 remain = max(0, int(self.action_duration - (now - self.state_start_time)))
-                self.draw_text(f"狀態：動作中", 360, 80, (0, 200, 0))
-                self.draw_text(f"剩餘時間：{remain}s", 360, 120)
+                self.draw_text(f"狀態：動作中", 700, 80, (0, 200, 0))
+                self.draw_text(f"剩餘時間：{remain}s", 700, 120)
             elif self.state == "BREAK":
                 remain = max(0, int(self.break_duration - (now - self.state_start_time)))
-                self.draw_text(f"狀態：休息", 360, 80, (200, 200, 0))
-                self.draw_text(f"休息倒數：{remain}s", 360, 120)
+                self.draw_text(f"狀態：休息", 700, 80, (200, 200, 0))
+                self.draw_text(f"休息倒數：{remain}s", 700, 120)
             elif self.state == "VIDEO":
                 remain = max(0, int(self.video_duration - (now - self.state_start_time)))
-                self.draw_text(f"狀態：影片播放", 360, 80, (200, 200, 0))
-                self.draw_text(f"影片播放倒數：{remain}s", 360, 120)
+                self.draw_text(f"狀態：影片播放", 700, 80, (200, 200, 0))
+                self.draw_text(f"影片播放倒數：{remain}s", 700, 120)
             elif self.state == "TRAIN":
                 remain = max(0, int(self.train_duration - (now - self.state_start_time)))
-                self.draw_text(f"狀態：練習", 360, 80, (200, 200, 0))
-                self.draw_text(f"練習倒數：{remain}s", 360, 120)
+                self.draw_text(f"狀態：練習", 700, 80, (200, 200, 0))
+                self.draw_text(f"練習倒數：{remain}s", 700, 120)
 
 
             # ===== 分數 =====
-            self.draw_text(f"分數：{self.score}", 360, 160, (255, 200, 50))
+            self.draw_text(f"分數：{self.score}", 700, 160, (255, 200, 50))
         #else:
         #    self.draw_text(f"最後得分：{self.score}",Config.WIDTH//2,Config.HEIGHT//2)
     def draw_text(self, text, x, y, color=(255,255,255)):
