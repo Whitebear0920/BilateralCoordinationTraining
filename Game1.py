@@ -12,7 +12,7 @@ class Game1Scene:
         self.gesture = gesture
         self.next_scene = None
         
-        self.state = "ACTION"
+        self.state = "BREAK"
         self.current_action_index = 0
         self.state_start_time  = time.time()
 
