@@ -141,8 +141,8 @@ class Game1Scene:
             },
             {#11
                 "Video": "CWV",
-                "RHand": "CW",
-                "LHand": "VERTICAL",
+                "RHand": "VERTICAL",
+                "LHand": "CW",
                 "name": "左順 + 右垂直",
                 "check": lambda g, s: (
                     g["left_cw_circle"] > s["left_cw_circle"] and
