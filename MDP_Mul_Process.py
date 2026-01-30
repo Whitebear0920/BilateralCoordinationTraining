@@ -61,7 +61,6 @@ def _mdp_worker(model_kind, model_path, input_q, output_q):
 
         output_q.put((idx, serialized))
 
-
 def _serialize_result(model_kind, result):
     if model_kind == "pose":
         lm_list = []
@@ -143,7 +142,7 @@ class MDP_MUL_PROCE:
         self._collector_lock = threading.Lock()
 
     # ========== Model 初始化 ==========
-    def resource_path(self, rel_path: str) -> str:
+    def _resource_path(self, rel_path: str) -> str:
         """
         PyInstaller onefile 會把資料解到 sys._MEIPASS
         開發環境則用專案目錄
@@ -215,6 +214,8 @@ class MDP_MUL_PROCE:
             with self._collector_lock:
                 self.results[idx] = out_data
 
+
+    # ========== 對外介面：送進 image、取得結果 ==========
     def start_worker(self):
         self._start_workers_if_needed()
         self._start_collector_if_needed()
@@ -223,7 +224,6 @@ class MDP_MUL_PROCE:
     def stop_worker(self):
         self.run_worker = False
 
-    # ========== 對外介面：送進 image、取得結果 ==========
     def image_input(self, frame: np.ndarray):
         if not self.run_worker:
             # 若尚未 start_worker，這裡直接丟掉（也可以選擇 buffer，看你之後要不要）
@@ -245,7 +245,7 @@ class MDP_MUL_PROCE:
 
     def get_result(self, idx):
         with self._collector_lock:
-            return self.results.get(idx, None)
+            return self.results.pop(idx, None)
 
     def clear_memory(self):
         self.results = {}
@@ -255,10 +255,6 @@ class MDP_MUL_PROCE:
         if not self.results:
             return 0
         return max(self.results.keys()) + 1
-
-    def get_all_results_in_order(self):
-        with self._collector_lock:
-            return [self.results[k] for k in sorted(self.results.keys())]
 
     # ========== 清理 ==========
     def clear(self):
