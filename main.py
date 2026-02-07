@@ -1,27 +1,28 @@
 import pygame
-import Config
-
-from Menu import MenuScene
-from Game1 import Game1Scene
-from Game1Result import Game1Result
-
-from GestureManager import GestureManager
-from AssetsManager import AssetsManager
-
+import config
 import multiprocessing as mp
+
+from modes.meau import MenuScene
+from modes.game1 import Game1Scene
+from modes.game1 import Game1Result
+from modes.game1 import GestureManager
+from modes.game1 import AssetsManager
+
 
 def main():
     gesture_mgr = GestureManager()
 
     pygame.init()
     pygame.mixer.init()
-    screen = pygame.display.set_mode((Config.WIDTH, Config.HEIGHT))
+    screen = pygame.display.set_mode((config.WIDTH, config.HEIGHT))
     clock = pygame.time.Clock()
 
     AssetsManager.preload()
 
-    #font = pygame.font.Font("font/msjh.ttc", 36)
+    #font = pygame.font.font("font/msjh.ttc", 36)
     menu = MenuScene(screen)
+
+    # default scene setting
     current = menu
 
     running = True
@@ -59,10 +60,11 @@ def main():
         current.draw()
         pygame.display.flip()
         clock.tick(60)
+
     gesture_mgr.stop()
     pygame.quit()
 
 if __name__ == "__main__":
     mp.freeze_support()
-
+    mp.set_start_method("spawn", force=True)
     main()

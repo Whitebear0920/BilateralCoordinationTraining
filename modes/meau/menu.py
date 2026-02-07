@@ -1,7 +1,7 @@
 import pygame
-import Config
-from ui.Button import Button
-from AssetsManager import AssetsManager
+import config
+from common import Button
+from modes.game1 import AssetsManager
 
 class MenuScene:
     def __init__(self, screen):
@@ -11,9 +11,9 @@ class MenuScene:
         self.btn_a = Button("遊戲 1", 0, 0, 200, 60, self.button_font)
         self.btn_b = Button("離開", 0, 0, 200, 60, self.button_font)
         #self.btn_c = Button("離開", 0, 0, 200, 60, self.button_font)
-        self.btn_a.rect.center = (Config.WIDTH//2, Config.HEIGHT//2 - 100)
-        self.btn_b.rect.center = (Config.WIDTH//2, Config.HEIGHT//2 + 100)
-        #self.btn_c.rect.center = (Config.WIDTH//2, Config.HEIGHT//2 + 300)
+        self.btn_a.rect.center = (config.WIDTH//2, config.HEIGHT//2 - 100)
+        self.btn_b.rect.center = (config.WIDTH//2, config.HEIGHT//2 + 100)
+        #self.btn_c.rect.center = (config.WIDTH//2, config.HEIGHT//2 + 300)
 
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:

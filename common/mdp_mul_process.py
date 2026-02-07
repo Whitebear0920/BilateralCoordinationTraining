@@ -2,7 +2,6 @@ import os
 import sys
 import cv2
 import multiprocessing as mp
-mp.set_start_method("spawn", force=True)
 import threading
 import queue
 import mediapipe as mp_task
@@ -111,7 +110,7 @@ def _serialize_result(model_kind, result):
         return {}
 
 class MDP_MUL_PROCE:
-    def __init__(self, MODEL_ROOT_PATH=r".\model", process_nums=4):
+    def __init__(self, MODEL_ROOT_PATH=r".\Assets\model", process_nums=4):
         mp.set_start_method("spawn", force=True)
 
         if not os.path.exists(MODEL_ROOT_PATH):
@@ -154,7 +153,7 @@ class MDP_MUL_PROCE:
         return os.path.join(base, rel_path)
 
     def pose_init(self):
-        model_path = self.resource_path(os.path.join("model", "pose_landmarker_full.task"))
+        model_path = self._resource_path(os.path.join("../assets/model", "pose_landmarker_full.task"))
         if not os.path.exists(model_path):
             raise ValueError(f"The {model_path} does not exist. Please check 'Pose' model.")
         self.model_kind = "pose"
@@ -162,7 +161,7 @@ class MDP_MUL_PROCE:
         print("Model Loaded!!")
 
     def face_init(self):
-        model_path = self.resource_path(os.path.join("model", "face_landmarker.task"))
+        model_path = self._resource_path(os.path.join("../assets/model", "face_landmarker.task"))
         if not os.path.exists(model_path):
             raise ValueError(f"The {model_path} does not exist. Please check 'Face' model.")
         self.model_kind = "face"
@@ -170,7 +169,7 @@ class MDP_MUL_PROCE:
         print("Model Loaded!!")
 
     def hands_init(self):
-        model_path = self.resource_path(os.path.join("model", "hand_landmarker.task"))
+        model_path = self._resource_path(os.path.join("../assets/model", "hand_landmarker.task"))
         if not os.path.exists(model_path):
             raise ValueError(f"The {model_path} does not exist. Please check 'Hand' model.")
         self.model_kind = "hands"

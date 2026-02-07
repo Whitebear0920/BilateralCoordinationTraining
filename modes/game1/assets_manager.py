@@ -1,10 +1,11 @@
 import pygame
 import os
-from VideoPlayer import VideoPlayer
-import Config
+from .video_player import VideoPlayer
+import config
+
 class AssetsManager:
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    ASSETS_DIR = "Assets"
+    ASSETS_DIR = "assets"
 
     images = {}
     sounds = {}
@@ -14,35 +15,35 @@ class AssetsManager:
     # ========= pre =========
     @classmethod
     def preload(cls):
-        print("[Assets] Preloading assets...")
+        print("[assets] Preloading assets...")
 
         # ---- Images ----
         cls._load_image("hand", "Image/Game1/hand.png")
 
         # ---- Sounds ----
-        cls._load_sound("coin", "Sound/coin.wav", volume=0.8)
+        cls._load_sound("coin", "sound/coin.wav", volume=0.8)
 
         # ---- Fonts ----
-        cls._load_font("main", "Font/msjh.ttc", 36)
+        cls._load_font("main", "font/msjh.ttc", 36)
 
-        # ---- Video ----
-        cls._load_video("CCWCCW", "Video/CCWCCW.mov", size=(960,540), loop=True)
-        cls._load_video("CCWCW", "Video/CCWCW.mov", size=(960,540), loop=True)
-        cls._load_video("CWCCW", "Video/CWCCW.mov", size=(960,540), loop=True)
-        cls._load_video("CWCW", "Video/CWCW.mov", size=(960,540), loop=True)
-        cls._load_video("VH", "Video/VH.mp4", size=(960,540), loop=True)
-        cls._load_video("HV", "Video/VH.mp4", size=(960,540), loop=True, flip_x=False)
-        cls._load_video("VCW", "Video/VCW.mp4", size=(960,540), loop=True)
-        cls._load_video("VCCW", "Video/VCCW.mp4", size=(960,540), loop=True)
-        cls._load_video("HCCW", "Video/HCCW.mp4", size=(960,540), loop=True)
-        cls._load_video("CCWV", "Video/VCW.mp4", size=(960,540), loop=True, flip_x=False)
-        cls._load_video("CWV", "Video/VCCW.mp4", size=(960,540), loop=True, flip_x=False)
-        cls._load_video("CWH", "Video/HCCW.mp4", size=(960,540), loop=True, flip_x=False)
-        cls._load_video("HH", "Video/HH.mp4", size=(960,540), loop=True)
-        cls._load_video("VV", "Video/VV.mp4", size=(960,540), loop=True)
-        cls._load_video("HCW", "Video/HCW.mp4", size=(960,540), loop=True)
-        cls._load_video("CCWH", "Video/CCWH.mp4", size=(960,540), loop=True, flip_x=False)
-        print("[Assets] Preload finished.")
+        # ---- video ----
+        cls._load_video("CCWCCW", "video/CCWCCW.mov", size=(960,540), loop=True)
+        cls._load_video("CCWCW", "video/CCWCW.mov", size=(960,540), loop=True)
+        cls._load_video("CWCCW", "video/CWCCW.mov", size=(960,540), loop=True)
+        cls._load_video("CWCW", "video/CWCW.mov", size=(960,540), loop=True)
+        cls._load_video("VH", "video/VH.mp4", size=(960,540), loop=True)
+        cls._load_video("HV", "video/VH.mp4", size=(960,540), loop=True, flip_x=False)
+        cls._load_video("VCW", "video/VCW.mp4", size=(960,540), loop=True)
+        cls._load_video("VCCW", "video/VCCW.mp4", size=(960,540), loop=True)
+        cls._load_video("HCCW", "video/HCCW.mp4", size=(960,540), loop=True)
+        cls._load_video("CCWV", "video/VCW.mp4", size=(960,540), loop=True, flip_x=False)
+        cls._load_video("CWV", "video/VCCW.mp4", size=(960,540), loop=True, flip_x=False)
+        cls._load_video("CWH", "video/HCCW.mp4", size=(960,540), loop=True, flip_x=False)
+        cls._load_video("HH", "video/HH.mp4", size=(960,540), loop=True)
+        cls._load_video("VV", "video/VV.mp4", size=(960,540), loop=True)
+        cls._load_video("HCW", "video/HCW.mp4", size=(960,540), loop=True)
+        cls._load_video("CCWH", "video/CCWH.mp4", size=(960,540), loop=True, flip_x=False)
+        print("[assets] Preload finished.")
 
     # ========= Image =========
     @classmethod
@@ -66,12 +67,12 @@ class AssetsManager:
             img = pygame.transform.smoothscale(img, scale)
         return img
 
-    # ========= Sound =========
+    # ========= sound =========
     @classmethod
     def _load_sound(cls, key, path, volume=1.0):
         full = os.path.join(cls.ASSETS_DIR, path)
         if not os.path.exists(full):
-            raise FileNotFoundError(f"Sound not found: {full}")
+            raise FileNotFoundError(f"sound not found: {full}")
 
         snd = pygame.mixer.Sound(full)
         snd.set_volume(volume)
@@ -81,12 +82,12 @@ class AssetsManager:
     def get_sound(cls, key):
         return cls.sounds[key]
 
-    # ========= Font =========
+    # ========= font =========
     @classmethod
     def _load_font(cls, key, path, size):
         full = os.path.join(cls.ASSETS_DIR, path)
         if not os.path.exists(full):
-            raise FileNotFoundError(f"Font not found: {full}")
+            raise FileNotFoundError(f"font not found: {full}")
 
         cls.fonts[key] = pygame.font.Font(full, size)
 
@@ -94,12 +95,12 @@ class AssetsManager:
     def get_font(cls, key):
         return cls.fonts[key]
 
-    # ========= Video =========
+    # ========= video =========
     @classmethod
     def _load_video(cls, key, path, size, loop=False, flip_x=True):
         full = os.path.join(cls.ASSETS_DIR, path)
         if not os.path.exists(full):
-            raise FileNotFoundError(f"Video not found: {full}")
+            raise FileNotFoundError(f"video not found: {full}")
 
         cls.videos[key] = VideoPlayer(full, size, loop, flip_x)
     

@@ -1,6 +1,7 @@
 import time
 import math
 import pygame
+
 class HandAni:
     def __init__(self, image, mode, start_pos, period,
                  amplitude=280, radius=320):

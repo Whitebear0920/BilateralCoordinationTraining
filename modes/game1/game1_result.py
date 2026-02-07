@@ -1,8 +1,8 @@
 import pygame
 
-import Config
-from ui.Button import Button
-from AssetsManager import AssetsManager
+import config
+from common.button import Button
+from .assets_manager import AssetsManager
 
 class Game1Result:
     def __init__(self, screen, result_data):
