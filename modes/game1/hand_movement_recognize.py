@@ -1,4 +1,4 @@
-from common.mdp_mul_process import MDP_MUL_PROCE
+from common import MDP_MUL_PROCE
 from modes.game1 import recognize_method as RMethod
 import threading
 import time
