@@ -5,9 +5,9 @@ import multiprocessing as mp
 from modes.meau import MenuScene
 from modes.game1 import Game1Scene
 from modes.game1 import Game1Result
-from modes.game1 import GestureManager
 from modes.game1 import AssetsManager
 
+from common import GestureManager
 
 def main():
     gesture_mgr = GestureManager()

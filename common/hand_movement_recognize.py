@@ -19,13 +19,8 @@ class HandMovementRecognize:
         self.game = game
         # open camera
         self.camera_and_mdpp_inst = self.CameraAndMDPPControl(self)
-        if self.game == "Game1":
-            # open recognize pipeline
-            self.movement_recognize = self.MovementRecognize(self)
-        elif self.game == "Game2":
-            self.hand_position_recognize = self.HandPositionRecognize(self)
-        else:
-            raise Exception("Unknown game type.")
+
+        self.movement_recognize = self.MovementRecognize(self)
 
     def external_api(self):
         with self.frame_lock:
@@ -46,10 +41,10 @@ class HandMovementRecognize:
 
     def clear(self):
         self.camera_and_mdpp_inst.camera_stop()
-        if self.game == "Game1":
+        try:
             self.movement_recognize.clear_movement_recognize()
-        elif self.game == "Game2":
-            self.hand_position_recognize.clear_hand_position_recognize()
+        finally:
+            print(f"movement_recognize cleared.")
         if self.camera_and_mdpp_inst is not None:
             self.camera_and_mdpp_inst.mdpp.clear()
 
@@ -128,28 +123,31 @@ class HandMovementRecognize:
             self.hmr = hmr
             self.clear_flag = False
 
-            #method initialize
-            self.left_ccw_circle_method = RMethod.CircularRecognition(direction="CCW")
-            self.right_ccw_circle_method = RMethod.CircularRecognition(direction="CCW")
-            self.left_cw_circle_method = RMethod.CircularRecognition(direction="CW")
-            self.right_cw_circle_method = RMethod.CircularRecognition(direction="CW")
-            self.left_horizontal_method = RMethod.HorizontalRecognition()
-            self.right_horizontal_method = RMethod.HorizontalRecognition()
-            self.left_vertical_method = RMethod.VerticalRecognition()
-            self.right_vertical_method = RMethod.VerticalRecognition()
+            if self.hmr.game == "Game1":
+                #method initialize
+                self.left_ccw_circle_method = RMethod.CircularRecognition(direction="CCW")
+                self.right_ccw_circle_method = RMethod.CircularRecognition(direction="CCW")
+                self.left_cw_circle_method = RMethod.CircularRecognition(direction="CW")
+                self.right_cw_circle_method = RMethod.CircularRecognition(direction="CW")
+                self.left_horizontal_method = RMethod.HorizontalRecognition()
+                self.right_horizontal_method = RMethod.HorizontalRecognition()
+                self.left_vertical_method = RMethod.VerticalRecognition()
+                self.right_vertical_method = RMethod.VerticalRecognition()
 
-            self.left_ccw_circle_loop = 0
-            self.right_ccw_circle_loop = 0
-            self.left_cw_circle_loop = 0
-            self.right_cw_circle_loop = 0
-            self.left_horizontal_loop = 0
-            self.right_horizontal_loop = 0
-            self.left_vertical_loop = 0
-            self.right_vertical_loop = 0
+                self.left_ccw_circle_loop = 0
+                self.right_ccw_circle_loop = 0
+                self.left_cw_circle_loop = 0
+                self.right_cw_circle_loop = 0
+                self.left_horizontal_loop = 0
+                self.right_horizontal_loop = 0
+                self.left_vertical_loop = 0
+                self.right_vertical_loop = 0
+            else:
+                pass
 
             self.movement_recognize_main()
 
-        def movement_recognize(self):
+        def game1_movement_recognize(self):
             while True:
                 if self.clear_flag:
                     break
@@ -216,8 +214,15 @@ class HandMovementRecognize:
                 else:
                     time.sleep(0.001)
 
+        def game2_movement_recognize(self):
+            pass
+
         def movement_recognize_main(self):
-            t = threading.Thread(target=self.movement_recognize, daemon=True)
+
+            if self.hmr.game == "Game1":
+                t = threading.Thread(target=self.game1_movement_recognize, daemon=True)
+            elif self.hmr.game == "Game2":
+                t = threading.Thread(target=self.game2_movement_recognize, daemon=True)
             t.start()
             self.hmr.threading_list.append(t)
 

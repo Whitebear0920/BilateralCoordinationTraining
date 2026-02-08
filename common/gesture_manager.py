@@ -1,4 +1,4 @@
-from .hand_movement_recognize import HandMovementRecognize
+from common.hand_movement_recognize import HandMovementRecognize
 
 class GestureManager:
     def __init__(self):
