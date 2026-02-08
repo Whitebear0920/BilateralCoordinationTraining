@@ -1,4 +1,5 @@
-from HandMovementRecognize import HandMovementRecognize
+from .hand_movement_recognize import HandMovementRecognize
+
 class GestureManager:
     def __init__(self):
         self.hm = None

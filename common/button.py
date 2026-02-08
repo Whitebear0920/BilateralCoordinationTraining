@@ -1,5 +1,5 @@
 import pygame
-from Config import BLUE, WHITE
+from config import BLUE, WHITE
 
 class Button:
     def __init__(self, text, x, y, width, height, font):

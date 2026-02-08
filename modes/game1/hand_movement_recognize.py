@@ -1,5 +1,5 @@
-from MDP_Mul_Process import MDP_MUL_PROCE
-import RecognizeMethod as RMethod
+from common import MDP_MUL_PROCE
+from modes.game1 import recognize_method as RMethod
 import threading
 import time
 import cv2

@@ -1,9 +1,9 @@
 import pygame
 import time
 
-import Config
-from HandAni import HandAni
-from AssetsManager import AssetsManager
+import config
+from .hand_anime import HandAni
+from .assets_manager import AssetsManager
 
 class Game1Scene:
     def __init__(self, screen, gesture):
@@ -30,7 +30,7 @@ class Game1Scene:
         self.enabled_action_indices = [4,5,6,7,8,9,10,11,12,13,2,3]    #啟用動作組
         self.action_sets = [
             {#0
-                "Video": "HH",
+                "video": "HH",
                 "RHand": "HORIZONTAL",
                 "LHand": "HORIZONTAL",
                 "name": "雙手水平",
@@ -40,7 +40,7 @@ class Game1Scene:
                 )
             },
             {#1
-                "Video": "VV",
+                "video": "VV",
                 "RHand": "VERTICAL",
                 "LHand": "VERTICAL",
                 "name": "雙手垂直",
@@ -50,7 +50,7 @@ class Game1Scene:
                 )
             },
             {#2
-                "Video": "VH",
+                "video": "VH",
                 "RHand": "HORIZONTAL",
                 "LHand": "VERTICAL",
                 "name": "左垂直 + 右水平",
@@ -60,7 +60,7 @@ class Game1Scene:
                 )
             },
             {#3
-                "Video": "HV",
+                "video": "HV",
                 "RHand": "VERTICAL",
                 "LHand": "HORIZONTAL",
                 "name": "左水平 + 右垂直",
@@ -70,7 +70,7 @@ class Game1Scene:
                 )
             },
             {#4
-                "Video": "CCWCW",
+                "video": "CCWCW",
                 "RHand": "CW",
                 "LHand": "CCW",
                 "name": "左逆 + 右順",
@@ -80,7 +80,7 @@ class Game1Scene:
                 )
             },
             {#5
-                "Video": "CCWCCW",
+                "video": "CCWCCW",
                 "RHand": "CCW",
                 "LHand": "CCW",
                 "name": "左逆 + 右逆",
@@ -90,7 +90,7 @@ class Game1Scene:
                 )
             },
             {#6
-                "Video": "CWCCW",
+                "video": "CWCCW",
                 "RHand": "CCW",
                 "LHand": "CW",
                 "name": "左順 + 右逆",
@@ -100,7 +100,7 @@ class Game1Scene:
                 )
             },
             {#7
-                "Video": "CWCW",
+                "video": "CWCW",
                 "RHand": "CW",
                 "LHand": "CW",
                 "name": "左順 + 右順",
@@ -110,7 +110,7 @@ class Game1Scene:
                 )
             },
             {#8
-                "Video": "VCW",
+                "video": "VCW",
                 "RHand": "CW",
                 "LHand": "VERTICAL",
                 "name": "左垂直 + 右順",
@@ -120,7 +120,7 @@ class Game1Scene:
                 )
             },
             {#9
-                "Video": "VCCW",
+                "video": "VCCW",
                 "RHand": "CCW",
                 "LHand": "VERTICAL",
                 "name": "左垂直 + 右逆",
@@ -130,7 +130,7 @@ class Game1Scene:
                 )
             },
             {#10
-                "Video": "CCWV",
+                "video": "CCWV",
                 "RHand": "VERTICAL",
                 "LHand": "CCW",
                 "name": "左逆 + 右垂直",
@@ -140,7 +140,7 @@ class Game1Scene:
                 )
             },
             {#11
-                "Video": "CWV",
+                "video": "CWV",
                 "RHand": "VERTICAL",
                 "LHand": "CW",
                 "name": "左順 + 右垂直",
@@ -150,7 +150,7 @@ class Game1Scene:
                 )
             },
             {#12
-                "Video": "HCCW",
+                "video": "HCCW",
                 "RHand": "CCW",
                 "LHand": "HORIZONTAL",
                 "name": "左水平 + 右逆",
@@ -160,7 +160,7 @@ class Game1Scene:
                 )
             },
             {#13
-                "Video": "CWH",
+                "video": "CWH",
                 "RHand": "HORIZONTAL",
                 "LHand": "CW",
                 "name": "左順 + 右水平",
@@ -170,7 +170,7 @@ class Game1Scene:
                 )
             },
             {#14
-                "Video": "HCW",
+                "video": "HCW",
                 "RHand": "CW",
                 "LHand": "HORIZONTAL",
                 "name": "左水平 + 右順",
@@ -180,7 +180,7 @@ class Game1Scene:
                 )
             },
             {#15
-                "Video": "CCWH",
+                "video": "CCWH",
                 "RHand": "HORIZONTAL",
                 "LHand": "CCW",
                 "name": "左逆 + 右水平",
@@ -194,10 +194,10 @@ class Game1Scene:
         self.font = AssetsManager.get_font("main")
         self.hand_img = AssetsManager.get_image("hand",(100,100))
         self.score_sfx = AssetsManager.get_sound("coin")
-        self.video = AssetsManager.get_video(self.action_sets[self.enabled_action_indices[0]]["Video"])
+        self.video = AssetsManager.get_video(self.action_sets[self.enabled_action_indices[0]]["video"])
 
-        self.Lhand_ani = HandAni(image=self.hand_img,mode=self.action_sets[self.enabled_action_indices[0]]["LHand"],start_pos=(Config.WIDTH//2-500, Config.HEIGHT//2),period=2.0)
-        self.Rhand_ani = HandAni(image=self.hand_img,mode=self.action_sets[self.enabled_action_indices[0]]["RHand"],start_pos=(Config.WIDTH//2+500, Config.HEIGHT//2),period=2.0)
+        self.Lhand_ani = HandAni(image=self.hand_img,mode=self.action_sets[self.enabled_action_indices[0]]["LHand"],start_pos=(config.WIDTH//2-500, config.HEIGHT//2),period=2.0)
+        self.Rhand_ani = HandAni(image=self.hand_img,mode=self.action_sets[self.enabled_action_indices[0]]["RHand"],start_pos=(config.WIDTH//2+500, config.HEIGHT//2),period=2.0)
 
     def handle_event(self, event):
         pass
@@ -215,12 +215,12 @@ class Game1Scene:
         self.draw_ui()
         self.draw_camera()
         if  self.state == "VIDEO":
-            self.video.draw(self.screen,(Config.WIDTH//2-480,Config.HEIGHT-700))
+            self.video.draw(self.screen,(config.WIDTH//2-480,config.HEIGHT-700))
         elif self.state == "TRAIN" or self.state == "ACTION":
             self.Lhand_ani.draw(self.screen)
             self.Rhand_ani.draw(self.screen)
-            pygame.draw.rect(self.screen,Config.GREEN,(Config.WIDTH//2-500, Config.HEIGHT//2,5,5))
-            pygame.draw.rect(self.screen,Config.GREEN,(Config.WIDTH//2+500, Config.HEIGHT//2,5,5))
+            pygame.draw.rect(self.screen,config.GREEN,(config.WIDTH//2-500, config.HEIGHT//2,5,5))
+            pygame.draw.rect(self.screen,config.GREEN,(config.WIDTH//2+500, config.HEIGHT//2,5,5))
 
     def update_data(self):
         temp = self.gesture()
@@ -324,7 +324,7 @@ class Game1Scene:
                 return
             self.Lhand_ani.mode = self.action_sets[self.enabled_action_indices[self.current_action_index]]["LHand"]
             self.Rhand_ani.mode = self.action_sets[self.enabled_action_indices[self.current_action_index]]["RHand"]
-            self.video = AssetsManager.get_video(self.action_sets[self.enabled_action_indices[self.current_action_index]]["Video"])
+            self.video = AssetsManager.get_video(self.action_sets[self.enabled_action_indices[self.current_action_index]]["video"])
             self.state = "BREAK"
             self.state_start_time = now
             self.window_start_time = None
@@ -384,7 +384,7 @@ class Game1Scene:
             # ===== 分數 =====
             self.draw_text(f"分數：{self.score}", 700, 160, (255, 200, 50))
         #else:
-        #    self.draw_text(f"最後得分：{self.score}",Config.WIDTH//2,Config.HEIGHT//2)
+        #    self.draw_text(f"最後得分：{self.score}",config.WIDTH//2,config.HEIGHT//2)
     def draw_text(self, text, x, y, color=(255,255,255)):
         surf = self.font.render(text, True, color)
         self.screen.blit(surf, (x, y))
