@@ -7,6 +7,8 @@ from modes.game1 import Game1Scene
 from modes.game1 import Game1Result
 from modes.game1 import AssetsManager
 
+from modes.game2 import Game2Scene
+
 from common import GestureManager
 
 def main():
@@ -16,9 +18,7 @@ def main():
     pygame.mixer.init()
     screen = pygame.display.set_mode((config.WIDTH, config.HEIGHT))
     clock = pygame.time.Clock()
-
     AssetsManager.preload()
-
     #font = pygame.font.font("font/msjh.ttc", 36)
     menu = MenuScene(screen)
 
@@ -35,6 +35,7 @@ def main():
         #Scene switch
         if isinstance(current.next_scene, dict):
             if current.next_scene["name"] == "Game1":
+
                 gesture_mgr.start("Game1")
                 current = Game1Scene(screen, gesture_mgr.api)
                 print("Game1")
@@ -44,6 +45,7 @@ def main():
                 print("Result")
             elif current.next_scene["name"] == "Game2":
                 gesture_mgr.stop()
+                current = Game2Scene(screen)
                 print("Game2")
             elif current.next_scene["name"] == "Menu":
                 gesture_mgr.stop()
