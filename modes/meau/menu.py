@@ -1,7 +1,7 @@
 import pygame
 import config
 from common import Button
-from modes.game1 import AssetsManager
+from common import AssetsManager
 
 class MenuScene:
     def __init__(self, screen):

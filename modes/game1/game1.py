@@ -3,7 +3,7 @@ import time
 
 import config
 from .hand_anime import HandAni
-from .assets_manager import AssetsManager
+from common.assets_manager import AssetsManager
 
 class Game1Scene:
     def __init__(self, screen, gesture):

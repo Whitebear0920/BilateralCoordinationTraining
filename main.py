@@ -5,7 +5,7 @@ import multiprocessing as mp
 from modes.meau import MenuScene
 from modes.game1 import Game1Scene
 from modes.game1 import Game1Result
-from modes.game1 import AssetsManager
+from common import AssetsManager
 
 from modes.game2 import Game2Scene
 
@@ -18,7 +18,8 @@ def main():
     pygame.mixer.init()
     screen = pygame.display.set_mode((config.WIDTH, config.HEIGHT))
     clock = pygame.time.Clock()
-    AssetsManager.preload()
+    # load common asset
+    AssetsManager.load_common_assets()
     #font = pygame.font.font("font/msjh.ttc", 36)
     menu = MenuScene(screen)
 
@@ -35,7 +36,7 @@ def main():
         #Scene switch
         if isinstance(current.next_scene, dict):
             if current.next_scene["name"] == "Game1":
-
+                AssetsManager.load_game1_assets()
                 gesture_mgr.start("Game1")
                 current = Game1Scene(screen, gesture_mgr.api)
                 print("Game1")
@@ -45,6 +46,7 @@ def main():
                 print("Result")
             elif current.next_scene["name"] == "Game2":
                 gesture_mgr.stop()
+                AssetsManager.load_game2_assets()
                 current = Game2Scene(screen)
                 print("Game2")
             elif current.next_scene["name"] == "Menu":
