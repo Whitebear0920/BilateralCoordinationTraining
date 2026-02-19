@@ -1,1 +1,3 @@
 from .game2 import Game2Scene
+from .score_manager import ScoreManager
+from .time_manager import TimeManager

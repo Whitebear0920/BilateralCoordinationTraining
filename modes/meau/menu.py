@@ -2,15 +2,16 @@ import pygame
 import config
 from common import Button
 from common import AssetsManager
+import config
 
 class MenuScene:
     def __init__(self, screen):
         self.screen = screen
         self.next_scene = None
         self.button_font = AssetsManager.get_font("main")
-        self.btn_game1 = Button("遊戲 1", 0, 0, 200, 60, self.button_font)
-        self.btn_game2 = Button("遊戲 2", 0, 0, 200, 60, self.button_font)
-        self.btn_exit = Button("離開", 0, 0, 200, 60, self.button_font)
+        self.btn_game1 = Button("遊戲 1", 0, 0, 200, 60, self.button_font, config.BLUE)
+        self.btn_game2 = Button("遊戲 2", 0, 0, 200, 60, self.button_font, config.BLUE)
+        self.btn_exit = Button("離開", 0, 0, 200, 60, self.button_font, config.BLUE)
 
         self.btn_game1.rect.center = (config.WIDTH//2, config.HEIGHT//2 - 100)
         self.btn_game2.rect.center = (config.WIDTH//2, config.HEIGHT//2 + 100)
