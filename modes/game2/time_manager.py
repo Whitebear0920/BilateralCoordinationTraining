@@ -3,7 +3,7 @@ import time
 from . import settings
 
 class TimeManager:
-    def __init__(self, play_time=300):
+    def __init__(self, play_time=10):
         self.start_time = 0
         self.start_flag = False
 

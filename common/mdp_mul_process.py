@@ -47,7 +47,7 @@ def _mdp_worker(model_kind, model_path, input_q, output_q):
 
         idx, frame = job
 
-        # 轉成 Mediapipe Image
+        # 轉成 Mediapipe image
         mp_image = mp_task.Image(
             image_format=mp_task.ImageFormat.SRGB,
             data=frame

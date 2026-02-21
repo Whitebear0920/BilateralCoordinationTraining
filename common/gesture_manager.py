@@ -4,6 +4,7 @@ class GestureManager:
     def __init__(self):
         self.hm = None
         self.api = None
+        self.state = "stop"
 
     def start(self,game):
         if self.hm is None:
@@ -11,6 +12,7 @@ class GestureManager:
             self.hm.camera_and_mdpp_inst.run_mediapipe()
             self.hm.camera_and_mdpp_inst.camera_start()
             self.api = self.hm.external_api
+            self.state = "start"
 
     def update(self, game):
         if self.hm is None:
@@ -32,3 +34,4 @@ class GestureManager:
             self.hm.clear()
             self.hm = None
             self.api = None
+            self.state = "stop"

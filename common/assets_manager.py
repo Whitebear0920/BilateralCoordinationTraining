@@ -28,7 +28,7 @@ class AssetsManager:
         def load_game1():
             print("[assets] Preloading Game1 assets...]")
             # ---- Images ----
-            cls._load_image("hand", "Image/Game1/hand.png")
+            cls._load_image("hand", "image/Game1/hand.png")
             # ---- Sounds ----
             cls._load_sound("coin", "sound/coin.wav", volume=0.8)
             # ---- video ----
@@ -61,15 +61,17 @@ class AssetsManager:
 
     @classmethod
     def load_game2_assets(cls):
-        print("[assets] Preloading Game1 assets...]")
-        print("[assets] Game1 Preload finished.")
+        print("[assets] Preloading Game2 assets...]")
+        cls._load_image("RED_SWORD", "image/game2/red_light_sword.png")
+        cls._load_image("BLUE_SWORD", "image/game2/blue_light_sword.png")
+        print("[assets] Game2 Preload finished.")
 
-    # ========= Image =========
+    # ========= image =========
     @classmethod
     def _load_image(cls, key, path, scale=None, alpha=True):
         full = os.path.join(cls.ASSETS_DIR, path)
         if not os.path.exists(full):
-            raise FileNotFoundError(f"Image not found: {full}")
+            raise FileNotFoundError(f"image not found: {full}")
 
         img = pygame.image.load(full)
         img = img.convert_alpha() if alpha else img.convert()
@@ -80,7 +82,7 @@ class AssetsManager:
         cls.images[key] = img
 
     @classmethod
-    def get_image(cls, key, scale):
+    def get_image(cls, key, scale=None):
         img = cls.images[key]
         if scale:
             img = pygame.transform.smoothscale(img, scale)

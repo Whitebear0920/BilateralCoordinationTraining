@@ -14,4 +14,4 @@ circle_center_x, circle_center_y = config.WIDTH // 2, config.HEIGHT
 level_dict = {1:5, 2:7, 3:9}
 
 # event ID
-GAME2_TIMER_ALERT = pygame.event.custom_type()
+GAME2_TIMER_ALERT = pygame.event.Event(pygame.event.custom_type())

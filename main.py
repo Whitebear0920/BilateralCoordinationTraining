@@ -45,7 +45,9 @@ def main():
                 current = Game1Result(screen, current.next_scene["data"])
                 print("Result")
             elif current.next_scene["name"] == "Game2":
-                gesture_mgr.stop()
+                if gesture_mgr.state == "start":
+                    gesture_mgr.stop()
+                gesture_mgr.start("Game2")
                 AssetsManager.load_game2_assets()
                 current = Game2Scene(screen)
                 print("Game2")

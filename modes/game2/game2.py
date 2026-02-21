@@ -6,6 +6,7 @@ from common import Button
 from .score_manager import ScoreManager
 from .time_manager import TimeManager
 from .settings import *
+from .light_sword import LightSword
 
 class Game2Scene:
     def __init__(self, screen):
@@ -17,59 +18,99 @@ class Game2Scene:
         self.time_manager.start_timer()
 
         self.font = AssetsManager.get_font("main")
-        self.draw_ui()
 
 
+        scale_ration = (judge_circle_radius - inner_circle_radius)  * 2
+        self.red_sword = AssetsManager.get_image("RED_SWORD")
+        self.blue_sword = AssetsManager.get_image("BLUE_SWORD")
+        self.red_sword = self._rescale_ration(self.red_sword, scale_ration)
+        self.blue_sword = self._rescale_ration(self.blue_sword, scale_ration)
+        self.Left_Sword = LightSword(self.red_sword)
+        self.Right_Sword = LightSword(self.blue_sword, start_revers=True)
+
+        self.sprite_manager = pygame.sprite.Group()
+        self.sprite_manager.add(self.Left_Sword)
+        self.sprite_manager.add(self.Right_Sword)
 
     def main(self):
-        pass
+        self.sprite_manager.update()
 
     def draw(self):
         self.screen.fill(config.GAME2_GRAY)
         self.draw_ui()
 
-    def draw_ui(self):
-        def rotation_fun(x, y, angle):
-            radian = angle * math.pi / 180
-            new_x = x * math.cos(radian) + y * math.sin(radian)
-            new_y = -1* x * math.sin(radian) + y * math.cos(radian)
-            return (new_x, new_y)
+        self.sprite_manager.draw(self.screen)
 
-        # Basic Layout
-        # Score Rect
-        text_surf = self.font.render(f"分數：{self.score_manager.get_score()}", True, "WHITE")
-        text_rect = text_surf.get_rect(topleft = (config.WIDTH * 0.05, config.HEIGHT * 0.05))
-        border_rect = text_rect.inflate(20, 10)
-        pygame.draw.rect(self.screen, "WHITE", border_rect, width=3)
-        self.screen.blit(text_surf, text_rect)
-        # Time Rect
-        text_surf = self.font.render(f"剩餘時間：{int(self.time_manager.get_remaining_time())//60:02d}:{int(self.time_manager.get_remaining_time()%60):02d}", True, "WHITE")
-        text_rect = text_surf.get_rect(topright=(config.WIDTH * 0.95, config.HEIGHT * 0.05))
-        border_rect = text_rect.inflate(20, 10)
-        pygame.draw.rect(self.screen, "WHITE", border_rect, width=3)
-        self.screen.blit(text_surf, text_rect)
-        # Pause Button
-        pause_button = Button("？", config.WIDTH * 0.96, config.HEIGHT * 0.05, config.WIDTH * 0.03, config.HEIGHT * 0.05 -5, self.font, config.GAME2_PAUSE_BTN)
+    def draw_ui(self):
+        # 1. 準備常用參數
+        center = pygame.Vector2(circle_center_x, circle_center_y)
+        num_lines = level_dict[self.level]
+        t = pygame.time.get_ticks() / 1000.0
+
+        # 計算旋轉角度 (180度平分)
+        # 注意：Pygame 的 Vector 旋轉角度正值是順時針，0度是指向右方 (1, 0)
+        start_angle = 180
+        angle_step = 180 / (num_lines - 1) if num_lines > 1 else 0
+
+        # --- 繪製順序：先畫線，再畫圓 (解決凸出問題) ---
+
+        # 2. 繪製內外圓相連線
+        for i in range(num_lines):
+            # 建立一個指向左方的基礎向量，然後旋轉
+            # 這裡的角度是 i * angle_step (順時針旋轉)
+            direction = pygame.Vector2(-1, 0).rotate(i * angle_step)
+
+            # 利用向量乘法快速得到座標
+            draw_start = center + direction * outer_circle_radius
+            draw_end = center + direction * inner_circle_radius
+
+            pygame.draw.line(self.screen, "WHITE", draw_start, draw_end, 5)
+
+        # 3. 繪製圓圈 (當作「蓋子」壓在線上面)
+        pygame.draw.circle(self.screen, "WHITE", center, inner_circle_radius, 2)
+        pygame.draw.circle(self.screen, "WHITE", center, outer_circle_radius, 5)
+        pygame.draw.circle(self.screen, "CYAN", center, judge_circle_radius, 3)
+
+        # 4. 繪製文字 UI (建議寫成小工具函數減少重複代碼)
+        self._draw_status_box(f"分數：{self.score_manager.get_score()}", (config.WIDTH * 0.05, config.HEIGHT * 0.05),
+                              "topleft")
+
+        time_val = self.time_manager.get_remaining_time()
+        time_str = f"剩餘時間：{int(time_val) // 60:02d}:{int(time_val % 60):02d}"
+
+        # 如果時間小於 5 秒，文字變紅色且閃爍
+        time_color = "WHITE"
+        if time_val <= 5 and int(t * 10) % 2 == 0:
+            time_color = (255, 50, 50)
+
+        self._draw_status_box(time_str, (config.WIDTH * 0.95, config.HEIGHT * 0.05), "topright", color=time_color)
+        # 5. 暫停按鈕
+        pause_button = Button("？", config.WIDTH * 0.96, config.HEIGHT * 0.05, config.WIDTH * 0.03,
+                              config.HEIGHT * 0.05 - 5, self.font, config.GAME2_PAUSE_BTN)
         pause_button.draw(self.screen)
-        # 內外圓
-        pygame.draw.circle(self.screen, "WHITE", (circle_center_x, circle_center_y), inner_circle_radius, 2)
-        pygame.draw.circle(self.screen, "WHITE", (circle_center_x, circle_center_y), outer_circle_radius, 5)
-        # 判定指示圓
-        pygame.draw.circle(self.screen, "CYAN", (circle_center_x, circle_center_y), judge_circle_radius, 3)
-        # 內外圓相連線
-        start_pos = (outer_circle_radius, 0)
-        end_pos = (inner_circle_radius, 0)
-        turn_angle = 180 / (level_dict[self.level]-1)
-        for i in range(level_dict[self.level]):
-            draw_start_pos = (start_pos[0] + circle_center_x, start_pos[1] + circle_center_y)
-            draw_end_pos = (end_pos[0] + circle_center_x, end_pos[1] + circle_center_y)
-            pygame.draw.line(self.screen, "WHITE", draw_start_pos, draw_end_pos, 5)
-            start_pos = rotation_fun(*start_pos, turn_angle)
-            end_pos = rotation_fun(*end_pos, turn_angle)
-        
 
     def update(self):
-        pass
+        self.main()
 
     def handle_event(self, event):
         pass
+
+    def _draw_status_box(self, text, pos, anchor, color="WHITE"):
+        text_surf = self.font.render(text, True, color)
+        text_rect = text_surf.get_rect(**{anchor: pos})
+
+        # 畫一個半透明的黑底背景，增加層次感
+        bg_rect = text_rect.inflate(20, 10)
+        bg_surf = pygame.Surface((bg_rect.width, bg_rect.height), pygame.SRCALPHA)
+        pygame.draw.rect(bg_surf, (0, 0, 0, 150), [0, 0, bg_rect.width, bg_rect.height])  # 150 是透明度
+        self.screen.blit(bg_surf, bg_rect.topleft)
+
+        # 畫邊框
+        pygame.draw.rect(self.screen, color, bg_rect, width=2)
+        self.screen.blit(text_surf, text_rect)
+
+    def _rescale_ration(self, image, target_height):
+        old_width, old_height = image.get_width(), image.get_height()
+        ratio = target_height / old_height
+        target_width = int(old_width * ratio)
+        return pygame.transform.smoothscale(image, (target_width, target_height))
