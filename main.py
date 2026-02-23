@@ -36,8 +36,11 @@ def main():
         #Scene switch
         if isinstance(current.next_scene, dict):
             if current.next_scene["name"] == "Game1":
+                if gesture_mgr.state == "start":
+                    gesture_mgr.update("Game1")
+                else:
+                    gesture_mgr.start("Game1")
                 AssetsManager.load_game1_assets()
-                gesture_mgr.start("Game1")
                 current = Game1Scene(screen, gesture_mgr.api)
                 print("Game1")
             elif current.next_scene["name"] == "Result":
@@ -46,10 +49,11 @@ def main():
                 print("Result")
             elif current.next_scene["name"] == "Game2":
                 if gesture_mgr.state == "start":
-                    gesture_mgr.stop()
-                gesture_mgr.start("Game2")
+                    gesture_mgr.update("Game2")
+                else:
+                    gesture_mgr.start("Game2")
                 AssetsManager.load_game2_assets()
-                current = Game2Scene(screen)
+                current = Game2Scene(screen, gesture_mgr.api)
                 print("Game2")
             elif current.next_scene["name"] == "Menu":
                 gesture_mgr.stop()

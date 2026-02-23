@@ -64,6 +64,10 @@ class AssetsManager:
         print("[assets] Preloading Game2 assets...]")
         cls._load_image("RED_SWORD", "image/game2/red_light_sword.png")
         cls._load_image("BLUE_SWORD", "image/game2/blue_light_sword.png")
+        cls._load_image("RED_MARBLE", "image/game2/red_marble.png")
+        cls._load_image("BLUE_MARBLE", "image/game2/blue_marble.png")
+        cls._load_image("RED_MARBLE_BROKE", "image/game2/red_marble_broke.png")
+        cls._load_image("BLUE_MARBLE_BROKE", "image/game2/blue_marble_broke.png")
         print("[assets] Game2 Preload finished.")
 
     # ========= image =========

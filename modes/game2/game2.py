@@ -1,7 +1,7 @@
 import pygame.draw
 import math
 import config
-from common import AssetsManager
+from common.assets_manager import AssetsManager
 from common import Button
 from .score_manager import ScoreManager
 from .time_manager import TimeManager
@@ -9,10 +9,12 @@ from .settings import *
 from .light_sword import LightSword
 
 class Game2Scene:
-    def __init__(self, screen):
+    def __init__(self, screen, api):
         self.screen = screen
         self.level = 1
         self.score_manager = ScoreManager()
+
+        self.angle_api = api
 
         self.time_manager = TimeManager()
         self.time_manager.start_timer()
@@ -25,12 +27,12 @@ class Game2Scene:
         self.blue_sword = AssetsManager.get_image("BLUE_SWORD")
         self.red_sword = self._rescale_ration(self.red_sword, scale_ration)
         self.blue_sword = self._rescale_ration(self.blue_sword, scale_ration)
-        self.Left_Sword = LightSword(self.red_sword)
-        self.Right_Sword = LightSword(self.blue_sword, start_revers=True)
+        self.left_sword = LightSword(self.red_sword, self.angle_api, "LEFT")
+        self.right_sword = LightSword(self.blue_sword, self.angle_api, "RIGHT")
 
         self.sprite_manager = pygame.sprite.Group()
-        self.sprite_manager.add(self.Left_Sword)
-        self.sprite_manager.add(self.Right_Sword)
+        self.sprite_manager.add(self.left_sword)
+        self.sprite_manager.add(self.right_sword)
 
     def main(self):
         self.sprite_manager.update()
