@@ -2,7 +2,7 @@ import pygame.draw
 import math
 import config
 from common.assets_manager import AssetsManager
-from common import Button
+from common.button import Button
 from .score_manager import ScoreManager
 from .time_manager import TimeManager
 from .settings import *
@@ -11,7 +11,6 @@ from .light_sword import LightSword
 class Game2Scene:
     def __init__(self, screen, api):
         self.screen = screen
-        self.level = 1
         self.score_manager = ScoreManager()
 
         self.angle_api = api
@@ -21,6 +20,8 @@ class Game2Scene:
 
         self.font = AssetsManager.get_font("main")
 
+        self.level = 1
+        self.angle_step = 180 / (level_dict[self.level] - 1) if level_dict[self.level] > 1 else 0
 
         scale_ration = (judge_circle_radius - inner_circle_radius)  * 2
         self.red_sword = AssetsManager.get_image("RED_SWORD")
@@ -34,24 +35,21 @@ class Game2Scene:
         self.sprite_manager.add(self.left_sword)
         self.sprite_manager.add(self.right_sword)
 
-    def main(self):
-        self.sprite_manager.update()
-
     def draw(self):
         self.screen.fill(config.GAME2_GRAY)
-        self.draw_ui()
 
+        self.draw_ui()
         self.sprite_manager.draw(self.screen)
 
     def draw_ui(self):
         # 1. 準備常用參數
         center = pygame.Vector2(circle_center_x, circle_center_y)
-        num_lines = level_dict[self.level]
+
         t = pygame.time.get_ticks() / 1000.0
 
         # 計算旋轉角度 (180度平分)
         # 注意：Pygame 的 Vector 旋轉角度正值是順時針，0度是指向右方 (1, 0)
-        start_angle = 180
+        num_lines = level_dict[self.level]
         angle_step = 180 / (num_lines - 1) if num_lines > 1 else 0
 
         # --- 繪製順序：先畫線，再畫圓 (解決凸出問題) ---
@@ -92,7 +90,7 @@ class Game2Scene:
         pause_button.draw(self.screen)
 
     def update(self):
-        self.main()
+        self.sprite_manager.update()
 
     def handle_event(self, event):
         pass
@@ -101,7 +99,6 @@ class Game2Scene:
         text_surf = self.font.render(text, True, color)
         text_rect = text_surf.get_rect(**{anchor: pos})
 
-        # 畫一個半透明的黑底背景，增加層次感
         bg_rect = text_rect.inflate(20, 10)
         bg_surf = pygame.Surface((bg_rect.width, bg_rect.height), pygame.SRCALPHA)
         pygame.draw.rect(bg_surf, (0, 0, 0, 150), [0, 0, bg_rect.width, bg_rect.height])  # 150 是透明度
@@ -116,3 +113,7 @@ class Game2Scene:
         ratio = target_height / old_height
         target_width = int(old_width * ratio)
         return pygame.transform.smoothscale(image, (target_width, target_height))
+
+    def _game_level_upgrade(self):
+        self.level += 1
+        self.angle_step = 180 / (level_dict[self.level] - 1) if level_dict[self.level] > 1 else 0
