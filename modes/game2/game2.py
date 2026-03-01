@@ -7,6 +7,7 @@ from .score_manager import ScoreManager
 from .time_manager import TimeManager
 from .settings import *
 from .light_sword import LightSword
+from .marble import Marble
 
 class Game2Scene:
     def __init__(self, screen, api):
@@ -34,6 +35,11 @@ class Game2Scene:
         self.sprite_manager = pygame.sprite.Group()
         self.sprite_manager.add(self.left_sword)
         self.sprite_manager.add(self.right_sword)
+
+        new_marble = Marble("RED", 5, level_dict[self.level], 1)
+        self.sprite_manager.add(new_marble)
+        new_marble = Marble("BLUE", 5, level_dict[self.level], 3)
+        self.sprite_manager.add(new_marble)
 
     def draw(self):
         self.screen.fill(config.GAME2_GRAY)
