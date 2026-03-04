@@ -17,14 +17,13 @@ class Game2Scene:
         self.next_scene = None
         # game control
         self.game_state = "PAUSE" # "PAUSE", "START"
+        # 遊戲參數設定
+        self.level = 1  # 遊戲等級
+        self.angle_step = 180 / (level_dict[self.level] - 1) if level_dict[self.level] > 1 else 0  # marble軌道角度控制
         # 時間控制
-        self.time_manager = TimeManager()
-        self.time_manager.start_timer()
+        self.time_manager = TimeManager(play_time=level_info_dict[self.level]["time"])
         # 角度計算API
         self.angle_api = api
-        # 遊戲參數設定
-        self.level = 1 # 遊戲等級
-        self.angle_step = 180 / (level_dict[self.level] - 1) if level_dict[self.level] > 1 else 0 # marble軌道角度控制
         # 縮放比例
         scale_ration = (judge_circle_radius - inner_circle_radius)  * 2
         # 光劍設定
@@ -49,7 +48,9 @@ class Game2Scene:
         self.pause_btn = None
 
     def update(self): # first call in the main loop
-        self.sprite_manager.update()
+        if self.game_state == "START":
+            self.time_manager.update_timer()
+            self.sprite_manager.update()
 
     def draw(self): # second call in the main loop
         self.screen.fill(config.GAME2_GRAY)
@@ -60,14 +61,33 @@ class Game2Scene:
             self.sprite_manager.draw(self.screen)
 
     def handle_event(self, event):
+        # 按鈕事件
         if self.game_state == "PAUSE":
             # 偵測 Start 按鈕
             if self.start_btn.is_clicked(event):
-                self.game_state = "START"  # 點擊後開始遊戲
-
+                self._change_game_state("START")
             # 偵測 Exit 按鈕
             if self.exit_btn.is_clicked(event):
                 self.next_scene = {"name":"Menu"}
+            # 偵測 ? 按鈕
+        elif self.game_state == "START":
+            if self.pause_btn is not None and self.pause_btn.is_clicked(event):
+                self._change_game_state("PAUSE")
+        # Game time over event
+        if self.game_state == "START":
+            if event == GAME2_TIMER_ALERT:
+                self._change_game_state("PAUSE")
+
+
+    def _change_game_state(self, state):
+        if state == "START":
+            self.game_state = "START"
+            self.time_manager.start_timer()
+            print("Game2 state is changed!! state: START")
+        elif state == "PAUSE":
+            self.game_state = "PAUSE"
+            self.time_manager.stop_timer()
+            print("Game2 state is changed!! state: PAUSE")
 
     # draw info box
     def _draw_info_box(self):
@@ -139,7 +159,11 @@ class Game2Scene:
         pygame.draw.circle(self.screen, "CYAN", center, judge_circle_radius, 3)
 
         # 4. 繪製文字 UI (建議寫成小工具函數減少重複代碼)
-        self._draw_status_box(f"分數：{self.score_manager.get_score()}", (config.WIDTH * 0.05, config.HEIGHT * 0.05),
+        self._draw_status_box("".join(["分數：",
+                                      str(self.score_manager.get_score()),
+                                      "/",
+                                      str(level_info_dict[self.level]["pass_score"])]),
+                              (config.WIDTH * 0.05, config.HEIGHT * 0.05),
                               "topleft")
 
         time_val = self.time_manager.get_remaining_time()

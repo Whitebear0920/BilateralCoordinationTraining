@@ -17,8 +17,8 @@ level_dict = {1:5, 2:7, 3:9}
 GAME2_TIMER_ALERT = pygame.event.Event(pygame.event.custom_type())
 
 level_info_dict = {
-    "level_1":{
-        "time":90,
+    1:{
+        "time":10,
         "pass_score":300,
         "marble_speed":10,
         "marble_map":{
@@ -27,7 +27,7 @@ level_info_dict = {
             "3":[0,0,0,1,0,0,2,0,0,1,0,0,2,0,0,0,0,1,0,2,0,1,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
         }
     },
-    "level_2":{
+    2:{
         "time":90,
         "pass_score":500,
         "marble_speed":10,
@@ -37,7 +37,7 @@ level_info_dict = {
             "3":[]
         }
     },
-    "level_3":{
+    3:{
         "time":90,
         "pass_score":500,
         "marble_speed":10,
