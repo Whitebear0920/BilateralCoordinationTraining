@@ -48,6 +48,10 @@ class AssetsManager:
             cls._load_video("VV", "video/VV.mp4", size=(960, 540), loop=True)
             cls._load_video("HCW", "video/HCW.mp4", size=(960, 540), loop=True)
             cls._load_video("CCWH", "video/CCWH.mp4", size=(960, 540), loop=True, flip_x=False)
+
+            # 紀錄載入狀態
+            cls.scene_asset_loaded = True
+            cls.scene_asset_load_name = "Game1"
             print("[assets] Game1 Preload finished.")
 
         if not cls.scene_asset_loaded:
@@ -61,14 +65,26 @@ class AssetsManager:
 
     @classmethod
     def load_game2_assets(cls):
-        print("[assets] Preloading Game2 assets...]")
-        cls._load_image("RED_SWORD", "image/game2/red_light_sword.png")
-        cls._load_image("BLUE_SWORD", "image/game2/blue_light_sword.png")
-        cls._load_image("RED_MARBLE", "image/game2/red_marble.png")
-        cls._load_image("BLUE_MARBLE", "image/game2/blue_marble.png")
-        cls._load_image("RED_MARBLE_BROKE", "image/game2/red_marble_broke.png")
-        cls._load_image("BLUE_MARBLE_BROKE", "image/game2/blue_marble_broke.png")
-        print("[assets] Game2 Preload finished.")
+        def load_game2():
+            print("[assets] Preloading Game2 assets...]")
+            cls._load_image("RED_SWORD", "image/game2/red_light_sword.png")
+            cls._load_image("BLUE_SWORD", "image/game2/blue_light_sword.png")
+            cls._load_image("RED_MARBLE", "image/game2/red_marble.png")
+            cls._load_image("BLUE_MARBLE", "image/game2/blue_marble.png")
+            cls._load_image("RED_MARBLE_BROKE", "image/game2/red_marble_broke.png")
+            cls._load_image("BLUE_MARBLE_BROKE", "image/game2/blue_marble_broke.png")
+
+            cls.scene_asset_loaded = True
+            cls.scene_asset_load_name = "Game2"
+            print("[assets] Game2 Preload finished.")
+        if not cls.scene_asset_loaded:
+            load_game2()
+        elif cls.scene_asset_load_name == "Game2":
+            print("[assets] Game1 had loaded.")
+        elif cls.scene_asset_load_name != "Game2":
+            # unload and load
+            cls._unload_current_scene()
+            load_game2()
 
     # ========= image =========
     @classmethod
@@ -148,7 +164,6 @@ class AssetsManager:
         cls.sounds.clear()
         cls.videos.clear()
         # 注意：fonts 通常很小，可以保留在 common，若要清空也可以
-
         cls.scene_asset_loaded = False
         cls.scene_asset_load_name = None
 

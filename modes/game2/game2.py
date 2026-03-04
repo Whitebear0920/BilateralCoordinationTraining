@@ -13,46 +13,107 @@ class Game2Scene:
     def __init__(self, screen, api):
         self.screen = screen
         self.score_manager = ScoreManager()
-
-        self.angle_api = api
-
+        self.font = AssetsManager.get_font("main")
+        self.next_scene = None
+        # game control
+        self.game_state = "PAUSE" # "PAUSE", "START"
+        # 時間控制
         self.time_manager = TimeManager()
         self.time_manager.start_timer()
-
-        self.font = AssetsManager.get_font("main")
-
-        self.level = 1
-        self.angle_step = 180 / (level_dict[self.level] - 1) if level_dict[self.level] > 1 else 0
-
+        # 角度計算API
+        self.angle_api = api
+        # 遊戲參數設定
+        self.level = 1 # 遊戲等級
+        self.angle_step = 180 / (level_dict[self.level] - 1) if level_dict[self.level] > 1 else 0 # marble軌道角度控制
+        # 縮放比例
         scale_ration = (judge_circle_radius - inner_circle_radius)  * 2
+        # 光劍設定
         self.red_sword = AssetsManager.get_image("RED_SWORD")
         self.blue_sword = AssetsManager.get_image("BLUE_SWORD")
         self.red_sword = self._rescale_ration(self.red_sword, scale_ration)
         self.blue_sword = self._rescale_ration(self.blue_sword, scale_ration)
         self.left_sword = LightSword(self.red_sword, self.angle_api, "LEFT")
         self.right_sword = LightSword(self.blue_sword, self.angle_api, "RIGHT")
-
         self.sprite_manager = pygame.sprite.Group()
         self.sprite_manager.add(self.left_sword)
         self.sprite_manager.add(self.right_sword)
+        # marble設定
+        for i in range(10):
+            red_marble_sprite = Marble("RED", 5, self.angle_step, 1)
+            blue_marble_sprite = Marble("BLUE", 5, self.angle_step, 3)
+            self.sprite_manager.add(red_marble_sprite)
+            self.sprite_manager.add(blue_marble_sprite)
+        # button設定
+        self.start_btn = None
+        self.exit_btn = None
+        self.pause_btn = None
 
-        new_marble = Marble("RED", 5, level_dict[self.level], 1)
-        self.sprite_manager.add(new_marble)
-        new_marble = Marble("BLUE", 5, level_dict[self.level], 3)
-        self.sprite_manager.add(new_marble)
+    def update(self): # first call in the main loop
+        self.sprite_manager.update()
 
-    def draw(self):
+    def draw(self): # second call in the main loop
         self.screen.fill(config.GAME2_GRAY)
+        if self.game_state == "PAUSE":
+            self._draw_info_box()
+        elif self.game_state == "START":
+            self._draw_ui()
+            self.sprite_manager.draw(self.screen)
 
-        self.draw_ui()
-        self.sprite_manager.draw(self.screen)
+    def handle_event(self, event):
+        if self.game_state == "PAUSE":
+            # 偵測 Start 按鈕
+            if self.start_btn.is_clicked(event):
+                self.game_state = "START"  # 點擊後開始遊戲
 
-    def draw_ui(self):
+            # 偵測 Exit 按鈕
+            if self.exit_btn.is_clicked(event):
+                self.next_scene = {"name":"Menu"}
+
+    # draw info box
+    def _draw_info_box(self):
+        # 1. 定義方框大小與位置
+        box_width, box_height = 400, 300
+        box_x = (config.WIDTH - box_width) // 2
+        box_y = (config.HEIGHT - box_height) // 2
+
+        # 2. 畫出外框底色 (可以用稍微深一點的灰色或半透明黑色)
+        # 繪製一個矩形作為背景
+        bg_rect = pygame.Rect(box_x, box_y, box_width, box_height)
+        pygame.draw.rect(self.screen, (50, 50, 50), bg_rect)  # 深灰色背景
+        pygame.draw.rect(self.screen, (255, 255, 255), bg_rect, 3)  # 白色邊框，寬度 3
+
+        # 3. 繪製文字 (標題)
+        title_surf = self.font.render("GAME PAUSED", True, (255, 255, 255))
+        title_rect = title_surf.get_rect(center=(config.WIDTH // 2, box_y + 50))
+        self.screen.blit(title_surf, title_rect)
+
+        # 4. 放置你的自定義按鈕
+        # 使用你提供的 Button 格式
+        btn_w, btn_h = 120, 45
+
+        # Start (或 Resume) 按鈕
+        self.start_btn = Button("Start",
+                            config.WIDTH // 2 - btn_w // 2,
+                            box_y + 120,
+                            btn_w, btn_h,
+                            self.font, config.GREEN)
+
+        # Exit 按鈕
+        self.exit_btn = Button("Exit",
+                          config.WIDTH // 2 - btn_w // 2,
+                          box_y + 190,
+                          btn_w, btn_h,
+                          self.font, config.RED)
+
+        # 執行按鈕的繪製方法 (假設你的 Button 類別有 draw 方法)
+        self.start_btn.draw(self.screen)
+        self.exit_btn.draw(self.screen)
+
+    # region inner function
+    def _draw_ui(self):
         # 1. 準備常用參數
         center = pygame.Vector2(circle_center_x, circle_center_y)
-
         t = pygame.time.get_ticks() / 1000.0
-
         # 計算旋轉角度 (180度平分)
         # 注意：Pygame 的 Vector 旋轉角度正值是順時針，0度是指向右方 (1, 0)
         num_lines = level_dict[self.level]
@@ -91,15 +152,9 @@ class Game2Scene:
 
         self._draw_status_box(time_str, (config.WIDTH * 0.95, config.HEIGHT * 0.05), "topright", color=time_color)
         # 5. 暫停按鈕
-        pause_button = Button("？", config.WIDTH * 0.96, config.HEIGHT * 0.05, config.WIDTH * 0.03,
+        self.pause_btn = Button("？", config.WIDTH * 0.96, config.HEIGHT * 0.05, config.WIDTH * 0.03,
                               config.HEIGHT * 0.05 - 5, self.font, config.GAME2_PAUSE_BTN)
-        pause_button.draw(self.screen)
-
-    def update(self):
-        self.sprite_manager.update()
-
-    def handle_event(self, event):
-        pass
+        self.pause_btn.draw(self.screen)
 
     def _draw_status_box(self, text, pos, anchor, color="WHITE"):
         text_surf = self.font.render(text, True, color)
@@ -123,3 +178,4 @@ class Game2Scene:
     def _game_level_upgrade(self):
         self.level += 1
         self.angle_step = 180 / (level_dict[self.level] - 1) if level_dict[self.level] > 1 else 0
+    # endregion

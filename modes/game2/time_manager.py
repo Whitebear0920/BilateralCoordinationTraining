@@ -9,7 +9,8 @@ class TimeManager:
 
         self.initial_time = play_time
 
-    def set_timer(self, time):
+
+    def set_timer(self, time): # Game duration varies depending on game level.
         # unit(second)
         self.initial_time = time
 

@@ -28,7 +28,6 @@ class Button:
 
     def draw(self, screen):
         mouse_pos = pygame.mouse.get_pos()
-
         if self.rect.collidepoint(mouse_pos):
             pygame.draw.rect(screen, self.hover_color, self.rect)
         else:
