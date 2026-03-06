@@ -280,7 +280,7 @@ class Game1Scene:
     def BREAK(self,now):
         if now - self.state_start_time >= self.break_duration:
                 
-                self.state = "VIDEO"
+                self.state = "TRAIN"
                 self.state_start_time = now
                 self.window_start_time = None
                 self.window_snapshot = None
