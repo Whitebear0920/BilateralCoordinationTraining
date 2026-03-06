@@ -19,6 +19,7 @@ class AssetsManager:
 
         # ---- Images ----
         cls._load_image("hand", "Image/Game1/hand.png")
+        cls._load_image("arrow", "Image/Game1/arrow.png")
 
         # ---- Sounds ----
         cls._load_sound("coin", "sound/coin.wav", volume=0.8)

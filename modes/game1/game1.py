@@ -27,7 +27,7 @@ class Game1Scene:
         self.score = 0
 
         self.frame_rect = pygame.Rect(0, 0, 640, 480) #鏡頭
-        self.enabled_action_indices = [4,5,6,7,8,9,10,11,12,13,2,3]    #啟用動作組
+        self.enabled_action_indices = [4,2,5,6,7,8,9,10,11,12,13,2,3]    #啟用動作組
         self.action_sets = [
             {#0
                 "video": "HH",
@@ -192,12 +192,12 @@ class Game1Scene:
         ]
         
         self.font = AssetsManager.get_font("main")
-        self.hand_img = AssetsManager.get_image("hand",(100,100))
+        self.hand_img = AssetsManager.get_image("arrow",(100,100))
         self.score_sfx = AssetsManager.get_sound("coin")
         self.video = AssetsManager.get_video(self.action_sets[self.enabled_action_indices[0]]["video"])
 
-        self.Lhand_ani = HandAni(image=self.hand_img,mode=self.action_sets[self.enabled_action_indices[0]]["LHand"],start_pos=(config.WIDTH//2-500, config.HEIGHT//2),period=2.0)
-        self.Rhand_ani = HandAni(image=self.hand_img,mode=self.action_sets[self.enabled_action_indices[0]]["RHand"],start_pos=(config.WIDTH//2+500, config.HEIGHT//2),period=2.0)
+        self.Lhand_ani = HandAni(image=self.hand_img,mode=self.action_sets[self.enabled_action_indices[0]]["LHand"],start_pos=(640//2-125, 480//2),period=2.0)
+        self.Rhand_ani = HandAni(image=self.hand_img,mode=self.action_sets[self.enabled_action_indices[0]]["RHand"],start_pos=(640//2+125, 480//2),period=2.0)
 
     def handle_event(self, event):
         pass
@@ -213,18 +213,19 @@ class Game1Scene:
     def draw(self):
         self.screen.fill((40, 40, 40))
         self.draw_ui()
-        self.draw_score()
+        self.draw_score()   
+        pygame.draw.rect(self.screen, (0, 0, 0), (0, 0, 640, 480))
         #self.draw_camera()
         if  self.state == "VIDEO":
             pass
             #self.video.draw(self.screen,(config.WIDTH//2-480,config.HEIGHT-700))
             #self.video.draw(self.screen,(config.WIDTH//2-480,config.HEIGHT-700))
         elif self.state == "TRAIN" or self.state == "ACTION":
+            self.Lhand_ani.draw(self.screen)
+            self.Rhand_ani.draw(self.screen)
+            pygame.draw.rect(self.screen,config.GREEN,(640//2-125, 480//2,5,5))
+            pygame.draw.rect(self.screen,config.GREEN,(640//2+125, 480//2,5,5))
             pass
-            #self.Lhand_ani.draw(self.screen)
-            #self.Rhand_ani.draw(self.screen)
-            #pygame.draw.rect(self.screen,config.GREEN,(config.WIDTH//2-500, config.HEIGHT//2,5,5))
-            #pygame.draw.rect(self.screen,config.GREEN,(config.WIDTH//2+500, config.HEIGHT//2,5,5))
 
     def update_data(self):
         temp = self.gesture()
