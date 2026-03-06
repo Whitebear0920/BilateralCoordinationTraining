@@ -25,6 +25,10 @@ class Game1Scene:
         self.window_start_time = None
         self.window_snapshot = None
         self.score = 0
+        self.left_wrist = None
+        self.right_wrist = None
+        self.smooth_L = None
+        self.smooth_R = None
 
         self.frame_rect = pygame.Rect(0, 0, 640, 480) #鏡頭
         self.enabled_action_indices = [4,2,5,6,7,8,9,10,11,12,13,2,3]    #啟用動作組
@@ -194,7 +198,7 @@ class Game1Scene:
         self.font = AssetsManager.get_font("main")
         self.hand_img = AssetsManager.get_image("arrow",(100,100))
         self.score_sfx = AssetsManager.get_sound("coin")
-        self.video = AssetsManager.get_video(self.action_sets[self.enabled_action_indices[0]]["video"])
+        #self.video = AssetsManager.get_video(self.action_sets[self.enabled_action_indices[0]]["video"])
 
         self.Lhand_ani = HandAni(image=self.hand_img,mode=self.action_sets[self.enabled_action_indices[0]]["LHand"],start_pos=(640//2-125, 480//2),period=2.0)
         self.Rhand_ani = HandAni(image=self.hand_img,mode=self.action_sets[self.enabled_action_indices[0]]["RHand"],start_pos=(640//2+125, 480//2),period=2.0)
@@ -207,7 +211,7 @@ class Game1Scene:
         self.main()
         self.Lhand_ani.update()
         self.Rhand_ani.update()
-        self.video.update()
+        #self.video.update()
         pass
 
     def draw(self):
@@ -226,9 +230,48 @@ class Game1Scene:
             pygame.draw.rect(self.screen,config.GREEN,(640//2-125, 480//2,5,5))
             pygame.draw.rect(self.screen,config.GREEN,(640//2+125, 480//2,5,5))
             pass
+        if self.last_snapshot.get("LPos"):
+            pygame.draw.circle(self.screen, (0,0,255), self.last_snapshot["LPos"], 10)
+
+        if self.last_snapshot.get("RPos"):
+            pygame.draw.circle(self.screen, (255,0,0), self.last_snapshot["RPos"], 10)
+    
 
     def update_data(self):
+        alpha = 0.3
         temp = self.gesture()
+
+        self.left_wrist = temp["left_wrist_xy"]
+        self.right_wrist = temp["right_wrist_xy"]
+
+        def to_game_pos(pos):
+            if pos is None:
+                return None
+            x, y = pos
+            gx = int((1.0 - x) * config.WIDTH)
+            gy = int(y * config.HEIGHT)
+            return gx, gy
+
+        LPos = to_game_pos(self.left_wrist)
+        RPos = to_game_pos(self.right_wrist)
+
+        # ===== 平滑 =====
+        if LPos:
+            if self.smooth_L is None:
+                self.smooth_L = LPos
+            else:
+                x = int(self.smooth_L[0]*(1-alpha) + LPos[0]*alpha)
+                y = int(self.smooth_L[1]*(1-alpha) + LPos[1]*alpha)
+                self.smooth_L = (x,y)
+
+        if RPos:
+            if self.smooth_R is None:
+                self.smooth_R = RPos
+            else:
+                x = int(self.smooth_R[0]*(1-alpha) + RPos[0]*alpha)
+                y = int(self.smooth_R[1]*(1-alpha) + RPos[1]*alpha)
+                self.smooth_R = (x,y)
+
         self.last_snapshot = {
             "now_frame": temp["now_frame"],
             "left_ccw_circle": temp["left_ccw_circle"],
@@ -239,8 +282,9 @@ class Game1Scene:
             "right_horizontal_loop": temp["right_horizontal_loop"],
             "left_vertical_loop": temp["left_vertical_loop"],
             "right_vertical_loop": temp["right_vertical_loop"],
+            "LPos": self.smooth_L,
+            "RPos": self.smooth_R
         }
-        #print(self.last_snapshot)
     
     def main(self):
         now = time.time()
@@ -329,7 +373,7 @@ class Game1Scene:
                 return
             self.Lhand_ani.mode = self.action_sets[self.enabled_action_indices[self.current_action_index]]["LHand"]
             self.Rhand_ani.mode = self.action_sets[self.enabled_action_indices[self.current_action_index]]["RHand"]
-            self.video = AssetsManager.get_video(self.action_sets[self.enabled_action_indices[self.current_action_index]]["video"])
+            #self.video = AssetsManager.get_video(self.action_sets[self.enabled_action_indices[self.current_action_index]]["video"])
             self.state = "BREAK"
             self.state_start_time = now
             self.window_start_time = None
@@ -416,7 +460,9 @@ class Game1Scene:
 
             pygame.draw.rect(self.screen, color, rect)
             pygame.draw.rect(self.screen, (0,0,0), rect, 2)  # 黑框
-        pass
+        if self.score > 100:
+            self.draw_text(text=f"分數破表啦!!!",x=50,y=start_y - 3*(cell_h + gap))
+        
     def draw_camera(self):
         frame = self.last_snapshot["now_frame"]
         if frame is None:
