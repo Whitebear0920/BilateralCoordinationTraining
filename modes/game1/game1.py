@@ -16,10 +16,10 @@ class Game1Scene:
         self.current_action_index = 0
         self.state_start_time  = time.time()
 
-        self.video_duration = 20.0      #影片時間
-        self.train_duration = 20.0      #練習時間
-        self.action_duration = 30.0     #動作時間
-        self.break_duration = 20.0      #休息時間
+        self.video_duration = 1.0#20.0      #影片時間
+        self.train_duration = 1.0#20.0      #練習時間
+        self.action_duration = 10.0#30.0     #動作時間
+        self.break_duration = 1.0#20.0      #休息時間
         self.window_sec = 1.0           #檢測時長
         
         self.window_start_time = None
@@ -213,14 +213,18 @@ class Game1Scene:
     def draw(self):
         self.screen.fill((40, 40, 40))
         self.draw_ui()
-        self.draw_camera()
+        self.draw_score()
+        #self.draw_camera()
         if  self.state == "VIDEO":
-            self.video.draw(self.screen,(config.WIDTH//2-480,config.HEIGHT-700))
+            pass
+            #self.video.draw(self.screen,(config.WIDTH//2-480,config.HEIGHT-700))
+            #self.video.draw(self.screen,(config.WIDTH//2-480,config.HEIGHT-700))
         elif self.state == "TRAIN" or self.state == "ACTION":
-            self.Lhand_ani.draw(self.screen)
-            self.Rhand_ani.draw(self.screen)
-            pygame.draw.rect(self.screen,config.GREEN,(config.WIDTH//2-500, config.HEIGHT//2,5,5))
-            pygame.draw.rect(self.screen,config.GREEN,(config.WIDTH//2+500, config.HEIGHT//2,5,5))
+            pass
+            #self.Lhand_ani.draw(self.screen)
+            #self.Rhand_ani.draw(self.screen)
+            #pygame.draw.rect(self.screen,config.GREEN,(config.WIDTH//2-500, config.HEIGHT//2,5,5))
+            #pygame.draw.rect(self.screen,config.GREEN,(config.WIDTH//2+500, config.HEIGHT//2,5,5))
 
     def update_data(self):
         temp = self.gesture()
@@ -388,7 +392,30 @@ class Game1Scene:
     def draw_text(self, text, x, y, color=(255,255,255)):
         surf = self.font.render(text, True, color)
         self.screen.blit(surf, (x, y))
+    def draw_score(self):
+        total = 10
+        cell_w = 40
+        cell_h = 20
+        gap = 4
 
+        start_x = 50
+        start_y = config.HEIGHT - (cell_h + gap) * total - 50
+        self.draw_text(text=f"{self.score}/100",x=50,y=config.HEIGHT - 40)
+        for i in range(total):
+            # 決定顏色
+            if i < self.score//10:
+                color = (255, 0, 0)   # 紅
+            else:
+                color = (255, 255, 255)  # 白
+
+            # 由下往上畫
+            y = start_y + (total - 1 - i) * (cell_h + gap)
+
+            rect = pygame.Rect(start_x, y, cell_w, cell_h)
+
+            pygame.draw.rect(self.screen, color, rect)
+            pygame.draw.rect(self.screen, (0,0,0), rect, 2)  # 黑框
+        pass
     def draw_camera(self):
         frame = self.last_snapshot["now_frame"]
         if frame is None:
