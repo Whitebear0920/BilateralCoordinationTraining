@@ -1,0 +1,37 @@
+from common.hand_movement_recognize import HandMovementRecognize
+
+class GestureManager:
+    def __init__(self):
+        self.hm = None
+        self.api = None
+        self.state = "stop"
+
+    def start(self,game):
+        if self.hm is None:
+            self.hm = HandMovementRecognize(game)
+            self.hm.camera_and_mdpp_inst.run_mediapipe()
+            self.hm.camera_and_mdpp_inst.camera_start()
+            self.api = self.hm.external_api
+            self.state = "start"
+
+    def update(self, game):
+        if self.hm is None:
+            Exception("GestureManager has not been started yet.")
+        else:
+            try:
+                self.hm.clear()
+                self.api = None
+            finally:
+                print("Previous recognizer has been cleared.")
+            self.hm = None
+            self.hm = HandMovementRecognize(game)
+            self.hm.camera_and_mdpp_inst.run_mediapipe()
+            self.hm.camera_and_mdpp_inst.camera_start()
+            self.api = self.hm.external_api
+
+    def stop(self):
+        if self.hm:
+            self.hm.clear()
+            self.hm = None
+            self.api = None
+            self.state = "stop"

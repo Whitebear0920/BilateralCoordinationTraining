@@ -1,0 +1,297 @@
+from common import MDP_MUL_PROCE
+from modes.game1 import recognize_method as game1_method
+from modes.game2 import recognize_method as game2_method
+import threading
+import time
+import cv2
+
+class HandMovementRecognize:
+    # 開相機
+    # 使用模型
+    # 結果判斷
+    # 提供結果
+
+    def __init__(self, game):
+        # variable
+        self.run_flag = False # camera 控制
+        self.threading_list = []
+        self.frame_lock = threading.Lock()
+        self.now_frame = None
+        self.game = game
+        # open camera
+        self.camera_and_mdpp_inst = self.CameraAndMDPPControl(self)
+
+        self.movement_recognize = self.MovementRecognize(self)
+
+    def external_api(self):
+        with self.frame_lock:
+            frame = None if self.now_frame is None else self.now_frame.copy()
+
+
+        with self.movement_recognize.data_lock:
+            if self.game == "Game1":
+                return {
+                    "now_frame" : frame,
+                    "left_wrist_xy": self.movement_recognize.left_wrist_xy, "right_wrist_xy": self.movement_recognize.right_wrist_xy,
+                    "left_ccw_circle":self.movement_recognize.left_ccw_circle_loop, "right_ccw_circle":self.movement_recognize.right_ccw_circle_loop,
+                    "left_cw_circle": self.movement_recognize.left_cw_circle_loop, "right_cw_circle": self.movement_recognize.right_cw_circle_loop,
+                    "left_vertical_loop":self.movement_recognize.left_vertical_loop, "right_vertical_loop":self.movement_recognize.right_vertical_loop,
+                    "left_horizontal_loop":self.movement_recognize.left_horizontal_loop, "right_horizontal_loop":self.movement_recognize.right_horizontal_loop,
+                }
+            elif self.game == "Game2":
+                return {
+                    "now_frame_data" : frame,
+                    "left_arm_angle" : self.movement_recognize.left_arm_angle,
+                    "right_arm_angle": self.movement_recognize.right_arm_angle
+                }
+
+    def clear(self):
+        self.camera_and_mdpp_inst.camera_stop()
+        try:
+            self.movement_recognize.clear_movement_recognize()
+        finally:
+            print(f"movement_recognize cleared.")
+        if self.camera_and_mdpp_inst is not None:
+            self.camera_and_mdpp_inst.mdpp.clear()
+
+    class CameraAndMDPPControl:
+        def __init__(self, hmr):
+            self.camera_frame_width =  640
+            self.camera_frame_height = 480
+            self.hmr = hmr
+            self.cap = None
+            self.mdpp = None
+            self.count_catch_images = 0
+
+        def camera_presetting_and_test(self):
+            ret, frame = self.cap.read()
+            if not ret:
+                raise Exception("Can't receive frame (stream end?). Exiting ...")
+            else:
+                print(f"Camera open success.")
+
+        def run_mediapipe(self):
+            self.mdpp = MDP_MUL_PROCE()
+            self.mdpp.pose_init()
+            self.mdpp.start_worker()
+
+        def camera_catch_frame_and_input_mdpp_loop(self):
+            while self.hmr.run_flag:
+                if self.mdpp is None:
+                    deadline = time.time() + 1.0
+                    print(f"MDPP not initialized.")
+                    while self.hmr.run_flag and self.mdpp is None and time.time() < deadline:
+                        time.sleep(0.005)
+                    if self.mdpp is None:
+                        print(f"camera time out.")
+                        break
+
+                ret, frame = self.cap.read()
+                if not ret:
+                    time.sleep(0.005)
+                    continue
+                with self.hmr.frame_lock:
+                    self.count_catch_images += 1
+                    self.hmr.now_frame = frame
+
+                self.mdpp.image_input(self.hmr.now_frame.copy())
+
+        def camera_start(self):
+            self.hmr.run_flag = True
+            self.cap = cv2.VideoCapture(0)
+            self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.camera_frame_width)
+            self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.camera_frame_height)
+            if not self.cap.isOpened():
+                raise Exception("Camera open failed.")
+            self.camera_presetting_and_test()
+
+            t = threading.Thread(target=self.camera_catch_frame_and_input_mdpp_loop, daemon=True)
+            t.start()
+            self.hmr.threading_list.append(t)
+            print(f"Start sending frame into mediapipe.")
+
+        def camera_stop(self):
+            self.hmr.run_flag = False
+            if self.cap is not None:
+                self.cap.release()
+            for t in self.hmr.threading_list:
+                if t is not None and t.is_alive():
+                    t.join(timeout=2)
+            try:
+                self.hmr.threading_list.clear()
+            finally:
+                print(f"Stop sending frame into mediapipe.")
+
+    class MovementRecognize:
+        def __init__(self, hmr):
+            # variable
+            self.recognize_frame_num = 0
+            self.hmr = hmr
+            self.clear_flag = False
+            self.data_lock = threading.Lock()
+
+            if self.hmr.game == "Game1":
+                #method initialize
+                self.left_ccw_circle_method = game1_method.CircularRecognition(direction="CCW")
+                self.right_ccw_circle_method = game1_method.CircularRecognition(direction="CCW")
+                self.left_cw_circle_method = game1_method.CircularRecognition(direction="CW")
+                self.right_cw_circle_method = game1_method.CircularRecognition(direction="CW")
+                self.left_horizontal_method = game1_method.HorizontalRecognition()
+                self.right_horizontal_method = game1_method.HorizontalRecognition()
+                self.left_vertical_method = game1_method.VerticalRecognition()
+                self.right_vertical_method = game1_method.VerticalRecognition()
+
+                self.left_wrist_xy = None
+                self.right_wrist_xy = None
+                self.left_ccw_circle_loop = 0
+                self.right_ccw_circle_loop = 0
+                self.left_cw_circle_loop = 0
+                self.right_cw_circle_loop = 0
+                self.left_horizontal_loop = 0
+                self.right_horizontal_loop = 0
+                self.left_vertical_loop = 0
+                self.right_vertical_loop = 0
+            else:
+                self.left_arm_angle_method = game2_method.AngleRecognizer()
+                self.right_arm_angle_method = game2_method.AngleRecognizer()
+
+                self.left_arm_angle = 270 - 90 // 2 # 270 朝上 180 朝左 360 朝右
+                self.right_arm_angle = 270 + 90 // 2
+
+            self.movement_recognize_main()
+
+        def game1_movement_recognize(self):
+            while True:
+                if self.clear_flag:
+                    break
+                if self.hmr.run_flag:
+                    this_frame = self.hmr.camera_and_mdpp_inst.mdpp.get_result(self.recognize_frame_num)
+                    if this_frame is not None:
+                        if len(this_frame["pose_landmarks"]) > 0:
+                            left_shoulder_xy = this_frame["pose_landmarks"][11][0:2]
+                            right_shoulder_xy = this_frame["pose_landmarks"][12][0:2]
+                            left_elbow_xy = this_frame["pose_landmarks"][13][0:2]
+                            right_elbow_xy = this_frame["pose_landmarks"][14][0:2]
+                            left_wrist_xy = this_frame["pose_landmarks"][15][0:2]
+                            right_wrist_xy = this_frame["pose_landmarks"][16][0:2]
+                            self.left_wrist_xy = left_wrist_xy
+                            self.right_wrist_xy = right_wrist_xy
+
+                            t_sec = time.time()
+                            # horizontal movement
+                            left_h_new_loop = self.left_horizontal_method.update(shoulder_xy=left_shoulder_xy,
+                                                                                 wrist_xy=left_wrist_xy, t_sec=t_sec)
+                            right_h_new_loop = self.right_horizontal_method.update(shoulder_xy=right_shoulder_xy,
+                                                                                   wrist_xy=right_wrist_xy, t_sec=t_sec)
+                            if left_h_new_loop > 0:
+                                with self.data_lock:
+                                    self.left_horizontal_loop = self.left_horizontal_method.count
+                            if right_h_new_loop > 0:
+                                with self.data_lock:
+                                    self.right_horizontal_loop = self.right_horizontal_method.count
+
+                            # vertical movement
+                            left_v_new_loop = self.left_vertical_method.update(shoulder_xy=left_shoulder_xy,
+                                                                               wrist_xy=left_wrist_xy, t_sec=t_sec)
+                            right_v_new_loop = self.right_vertical_method.update(shoulder_xy=right_shoulder_xy,
+                                                                                 wrist_xy=right_wrist_xy, t_sec=t_sec)
+                            if left_v_new_loop > 0:
+                                with self.data_lock:
+                                    self.left_vertical_loop = self.left_vertical_method.count
+                            if right_v_new_loop > 0:
+                                with self.data_lock:
+                                    self.right_vertical_loop = self.right_vertical_method.count
+
+                            # counter clockwise circle movement
+                            left_ccw_new_loop = self.left_ccw_circle_method.update(shoulder_xy=left_shoulder_xy,
+                                                                                   elbow_xy=left_elbow_xy,
+                                                                                   wrist_xy=left_wrist_xy, t_sec=t_sec)
+                            right_ccw_new_loop = self.right_ccw_circle_method.update(shoulder_xy=right_shoulder_xy,
+                                                                                     elbow_xy=right_elbow_xy,
+                                                                                     wrist_xy=right_wrist_xy,
+                                                                                     t_sec=t_sec)
+                            if left_ccw_new_loop > 0:
+                                with self.data_lock:
+                                    self.left_ccw_circle_loop = self.left_ccw_circle_method.total
+                            if right_ccw_new_loop > 0:
+                                with self.data_lock:
+                                    self.right_ccw_circle_loop = self.right_ccw_circle_method.total
+
+                            # clockwise circle movement
+                            left_cw_new_loop = self.left_cw_circle_method.update(shoulder_xy=left_shoulder_xy,
+                                                                                 elbow_xy=left_elbow_xy,
+                                                                                 wrist_xy=left_wrist_xy, t_sec=t_sec)
+                            right_cw_new_loop = self.right_cw_circle_method.update(shoulder_xy=right_shoulder_xy,
+                                                                                   elbow_xy=right_elbow_xy,
+                                                                                   wrist_xy=right_wrist_xy, t_sec=t_sec)
+                            if left_cw_new_loop > 0:
+                                with self.data_lock:
+                                    self.left_cw_circle_loop = self.left_cw_circle_method.total
+                            if right_cw_new_loop > 0:
+                                with self.data_lock:
+                                    self.right_cw_circle_loop = self.right_cw_circle_method.total
+
+                        self.recognize_frame_num += 1
+                    else:
+                        continue
+                else:
+                    time.sleep(0.001)
+
+        def game2_movement_recognize(self):
+            while True:
+                if self.clear_flag:
+                    break
+                if self.hmr.run_flag:
+                    this_frame = self.hmr.camera_and_mdpp_inst.mdpp.get_result(self.recognize_frame_num)
+                    if this_frame is not None:
+                        if len(this_frame["pose_landmarks"]) > 0:
+                            left_wrist = this_frame["pose_landmarks"][15][0:2]
+                            left_elbow = this_frame["pose_landmarks"][13][0:2]
+                            right_wrist = this_frame["pose_landmarks"][16][0:2]
+                            right_elbow = this_frame["pose_landmarks"][14][0:2]
+
+                            t_sec = time.time()
+
+                            new_left_angle = self.left_arm_angle_method.update(wrist=left_wrist, elbow=left_elbow, t_sec=t_sec)
+                            new_right_angle = self.right_arm_angle_method.update(wrist=right_wrist, elbow=right_elbow, t_sec=t_sec)
+                            with self.data_lock:
+                                self.left_arm_angle = new_left_angle
+                                self.right_arm_angle = new_right_angle
+
+                        self.recognize_frame_num += 1
+                    else:
+                        continue
+                else:
+                    time.sleep(0.001)
+
+        def movement_recognize_main(self):
+            if self.hmr.game == "Game1":
+                t = threading.Thread(target=self.game1_movement_recognize, daemon=True)
+            elif self.hmr.game == "Game2":
+                t = threading.Thread(target=self.game2_movement_recognize, daemon=True)
+            t.start()
+            self.hmr.threading_list.append(t)
+
+        def clear_movement_recognize(self):
+            self.clear_flag = True
+
+
+
+if __name__ == "__main__":
+    hm = HandMovementRecognize("Game2")
+    hm.camera_and_mdpp_inst.run_mediapipe()
+    hm.camera_and_mdpp_inst.camera_start()
+    try:
+        while True:
+            # 這裡會自動「阻塞」等待，直到 MediaPipe 出結果
+            # 不再需要 time.sleep(0.001)
+            data = hm.external_api()
+
+            wrist_coords = data.get("wrist_coordinate")
+            if wrist_coords:  # 檢查是否非空
+                print(f"Left Wrist: {wrist_coords['Left']}")
+    finally:
+        hm.clear()
+        cv2.destroyAllWindows()
+
+

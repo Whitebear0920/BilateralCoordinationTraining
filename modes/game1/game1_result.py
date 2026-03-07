@@ -2,7 +2,7 @@ import pygame
 
 import config
 from common.button import Button
-from .assets_manager import AssetsManager
+from common.assets_manager import AssetsManager
 
 class Game1Result:
     def __init__(self, screen, result_data):

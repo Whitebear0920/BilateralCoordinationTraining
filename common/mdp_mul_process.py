@@ -47,7 +47,7 @@ def _mdp_worker(model_kind, model_path, input_q, output_q):
 
         idx, frame = job
 
-        # 轉成 Mediapipe Image
+        # 轉成 Mediapipe image
         mp_image = mp_task.Image(
             image_format=mp_task.ImageFormat.SRGB,
             data=frame
@@ -153,7 +153,7 @@ class MDP_MUL_PROCE:
         return os.path.join(base, rel_path)
 
     def pose_init(self):
-        model_path = self._resource_path(os.path.join("../assets/model", "pose_landmarker_full.task"))
+        model_path = self._resource_path(os.path.join("../assets/model", "pose_landmarker_heavy.task"))
         if not os.path.exists(model_path):
             raise ValueError(f"The {model_path} does not exist. Please check 'Pose' model.")
         self.model_kind = "pose"
