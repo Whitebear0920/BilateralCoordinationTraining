@@ -20,7 +20,7 @@ class Game1Scene:
         self.video_duration = 20.0      #影片時間
         self.train_duration = 20.0      #練習時間
         self.action_duration = 30.0     #動作時間
-        self.break_duration = 20.0      #休息時間
+        self.break_duration = 1.0      #休息時間
         self.window_sec = 1.0           #檢測時長
         
         self.window_start_time = None
@@ -32,7 +32,7 @@ class Game1Scene:
         self.smooth_R = None
 
         self.frame_rect = pygame.Rect(0, 0, 640, 480) #鏡頭
-        self.enabled_action_indices = [4,2,5,6,7,8,9,10,11,12,13,2,3]    #啟用動作組
+        self.enabled_action_indices = [4,5,6,7,8,9,10,11,12,13,2,3]    #啟用動作組
         self.action_sets = [
             {#0
                 "video": "HH",
@@ -197,12 +197,13 @@ class Game1Scene:
         ]
         
         self.font = AssetsManager.get_font("main")
-        self.hand_img = AssetsManager.get_image("arrow",(100,100))
+        self.arrow_img = AssetsManager.get_image("arrow",(100,100))
+        self.hand_img = AssetsManager.get_image("hand",(100,100))
         self.score_sfx = AssetsManager.get_sound("coin")
         #self.video = AssetsManager.get_video(self.action_sets[self.enabled_action_indices[0]]["video"])
         self.btn_a = Button("Menu", config.WIDTH-200, config.HEIGHT-60, 200, 60, self.font)
-        self.Lhand_ani = HandAni(image=self.hand_img,mode=self.action_sets[self.enabled_action_indices[0]]["LHand"],start_pos=(640//2-125, 480//2),period=2.0)
-        self.Rhand_ani = HandAni(image=self.hand_img,mode=self.action_sets[self.enabled_action_indices[0]]["RHand"],start_pos=(640//2+125, 480//2),period=2.0)
+        self.Lhand_ani = HandAni(image=self.arrow_img,mode=self.action_sets[self.enabled_action_indices[0]]["LHand"],start_pos=(640//2-125, 480//2),period=2.0)
+        self.Rhand_ani = HandAni(image=self.arrow_img,mode=self.action_sets[self.enabled_action_indices[0]]["RHand"],start_pos=(640//2+125, 480//2),period=2.0)
 
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -236,10 +237,14 @@ class Game1Scene:
             pygame.draw.rect(self.screen,config.GREEN,(640//2+125, 480//2,5,5))
             pass
         if self.last_snapshot.get("LPos"):
-            pygame.draw.circle(self.screen, (0,0,255), self.last_snapshot["LPos"], 10)
+            rect = self.arrow_img.get_rect(center = self.last_snapshot["LPos"])
+            self.screen.blit(self.hand_img,rect)
+            #pygame.draw.circle(self.screen, (0,0,255), self.last_snapshot["LPos"], 10)
 
         if self.last_snapshot.get("RPos"):
-            pygame.draw.circle(self.screen, (255,0,0), self.last_snapshot["RPos"], 10)
+            rect = self.arrow_img.get_rect(center = self.last_snapshot["RPos"])
+            self.screen.blit(self.hand_img,rect)
+            #pygame.draw.circle(self.screen, (255,0,0), self.last_snapshot["RPos"], 10)
     
 
     def update_data(self):
