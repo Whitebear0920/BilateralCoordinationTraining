@@ -18,7 +18,7 @@ GAME2_TIMER_ALERT = pygame.event.Event(pygame.event.custom_type())
 
 level_info_dict = {
     1:{
-        "time":10,
+        "time":60,
         "pass_score":300,
         "marble_speed":10,
         "marble_map":{

@@ -1,6 +1,7 @@
 import pygame.draw
 import math
 import config
+import random
 from common.assets_manager import AssetsManager
 from common.button import Button
 from .score_manager import ScoreManager
@@ -31,34 +32,80 @@ class Game2Scene:
         self.blue_sword = AssetsManager.get_image("BLUE_SWORD")
         self.red_sword = self._rescale_ration(self.red_sword, scale_ration)
         self.blue_sword = self._rescale_ration(self.blue_sword, scale_ration)
-        self.left_sword = LightSword(self.red_sword, self.angle_api, "LEFT")
-        self.right_sword = LightSword(self.blue_sword, self.angle_api, "RIGHT")
-        self.sprite_manager = pygame.sprite.Group()
-        self.sprite_manager.add(self.left_sword)
-        self.sprite_manager.add(self.right_sword)
+        self.left_sword = LightSword(self.red_sword, self.angle_api, "LEFT") # 左手紅
+        self.right_sword = LightSword(self.blue_sword, self.angle_api, "RIGHT") # 右手藍
+        self.sword_sprite_manager = pygame.sprite.Group()
+        self.sword_sprite_manager.add(self.left_sword)
+        self.sword_sprite_manager.add(self.right_sword)
         # marble設定
-        for i in range(10):
-            red_marble_sprite = Marble("RED", 5, self.angle_step, 1)
-            blue_marble_sprite = Marble("BLUE", 5, self.angle_step, 3)
-            self.sprite_manager.add(red_marble_sprite)
-            self.sprite_manager.add(blue_marble_sprite)
+        self.next_generate_time = None # 生成時間控制
+        self.marble_pool = {"RED":[], "BLUE":[]}
+        self.marble_sprite_manager = pygame.sprite.Group()
+        for _ in range(10):
+            red_marble_sprite = Marble("RED", level_info_dict[self.level]["marble_speed"], self.angle_step)
+            blue_marble_sprite = Marble("BLUE", level_info_dict[self.level]["marble_speed"], self.angle_step)
+            self.marble_pool["RED"].append(red_marble_sprite)
+            self.marble_pool["BLUE"].append(blue_marble_sprite)
+            self.marble_sprite_manager.add(red_marble_sprite)
+            self.marble_sprite_manager.add(blue_marble_sprite)
         # button設定
         self.start_btn = None
         self.exit_btn = None
         self.pause_btn = None
 
+
     def update(self): # first call in the main loop
         if self.game_state == "START":
+            # 更新時間
             self.time_manager.update_timer()
-            self.sprite_manager.update()
+            # 更新光劍
+            self.sword_sprite_manager.update()
+            # Every 1 sec go to marble_pool find an inactive sprite.
+            this_generate_time = self.time_manager.get_remaining_time()
+            if self.next_generate_time is None or self.next_generate_time - this_generate_time >= 2:
+                self.next_generate_time = this_generate_time
+                # 生成一顆marble 隨機位置 隨機顏色
+                random_number = random.randint(1,2)
+                if random_number == 1:
+                    marble_color = "RED"
+                else:
+                    marble_color = "BLUE"
+                print(f"generate {marble_color} marble!!")
+                for m in self.marble_pool[marble_color]:
+                    if not m.is_active():
+                        m.update_offset(new_track_id=random.randint(1,3), new_speed=level_info_dict[self.level]["marble_speed"])
+                        m.active_sprite()
+                        break
+            # Update marble_pool
+            for color, ls in self.marble_pool.items():
+                for m in ls:
+                    if m.is_active():
+                        m.update()
+            # 碰撞檢查
+            for sword in self.sword_sprite_manager:
+                hit_list = pygame.sprite.spritecollide(sword, self.marble_sprite_manager, False, pygame.sprite.collide_circle)
+                for m in hit_list:
+                    if m.color == "RED" and sword.hand == "LEFT":
+                        m.hit()
+                    elif m.color == "BLUE" and sword.hand == "RIGHT":
+                        m.hit()
+
 
     def draw(self): # second call in the main loop
         self.screen.fill(config.GAME2_GRAY)
         if self.game_state == "PAUSE":
+            # 畫暫停框
             self._draw_info_box()
         elif self.game_state == "START":
+            # 畫場景
             self._draw_ui()
-            self.sprite_manager.draw(self.screen)
+            # 畫marble
+            for color, ls in self.marble_pool.items():
+                for m in ls:
+                    if m.is_active():
+                        m.draw(self.screen)
+            # 畫光劍
+            self.sword_sprite_manager.draw(self.screen)
 
     def handle_event(self, event):
         # 按鈕事件

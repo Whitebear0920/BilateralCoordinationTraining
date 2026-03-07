@@ -97,7 +97,7 @@ class HandMovementRecognize:
 
         def camera_start(self):
             self.hmr.run_flag = True
-            self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+            self.cap = cv2.VideoCapture(0)
             self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.camera_frame_width)
             self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.camera_frame_height)
             if not self.cap.isOpened():
