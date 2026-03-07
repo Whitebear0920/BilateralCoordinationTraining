@@ -32,7 +32,7 @@ class Game1Scene:
         self.smooth_R = None
         self.LTrail = []
         self.RTrail = []
-        self.trail_max = 30
+        self.trail_max = 150
 
         self.frame_rect = pygame.Rect(0, 0, 640, 480) #鏡頭
         self.enabled_action_indices = [4,5,6,7,8,9,10,11,12,13,2,3]    #啟用動作組
