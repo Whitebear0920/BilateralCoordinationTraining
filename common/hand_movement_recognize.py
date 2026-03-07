@@ -32,6 +32,7 @@ class HandMovementRecognize:
             if self.game == "Game1":
                 return {
                     "now_frame" : frame,
+                    "left_wrist_xy": self.movement_recognize.left_wrist_xy, "right_wrist_xy": self.movement_recognize.right_wrist_xy,
                     "left_ccw_circle":self.movement_recognize.left_ccw_circle_loop, "right_ccw_circle":self.movement_recognize.right_ccw_circle_loop,
                     "left_cw_circle": self.movement_recognize.left_cw_circle_loop, "right_cw_circle": self.movement_recognize.right_cw_circle_loop,
                     "left_vertical_loop":self.movement_recognize.left_vertical_loop, "right_vertical_loop":self.movement_recognize.right_vertical_loop,
@@ -140,6 +141,8 @@ class HandMovementRecognize:
                 self.left_vertical_method = game1_method.VerticalRecognition()
                 self.right_vertical_method = game1_method.VerticalRecognition()
 
+                self.left_wrist_xy = None
+                self.right_wrist_xy = None
                 self.left_ccw_circle_loop = 0
                 self.right_ccw_circle_loop = 0
                 self.left_cw_circle_loop = 0
@@ -171,6 +174,8 @@ class HandMovementRecognize:
                             right_elbow_xy = this_frame["pose_landmarks"][14][0:2]
                             left_wrist_xy = this_frame["pose_landmarks"][15][0:2]
                             right_wrist_xy = this_frame["pose_landmarks"][16][0:2]
+                            self.left_wrist_xy = left_wrist_xy
+                            self.right_wrist_xy = right_wrist_xy
 
                             t_sec = time.time()
                             # horizontal movement
