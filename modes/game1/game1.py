@@ -1,6 +1,7 @@
 import pygame
 import time
 
+from common import Button
 import config
 from .hand_anime import HandAni
 from .assets_manager import AssetsManager
@@ -16,10 +17,10 @@ class Game1Scene:
         self.current_action_index = 0
         self.state_start_time  = time.time()
 
-        self.video_duration = 1.0#20.0      #影片時間
-        self.train_duration = 1.0#20.0      #練習時間
-        self.action_duration = 10.0#30.0     #動作時間
-        self.break_duration = 1.0#20.0      #休息時間
+        self.video_duration = 20.0      #影片時間
+        self.train_duration = 20.0      #練習時間
+        self.action_duration = 30.0     #動作時間
+        self.break_duration = 20.0      #休息時間
         self.window_sec = 1.0           #檢測時長
         
         self.window_start_time = None
@@ -199,11 +200,14 @@ class Game1Scene:
         self.hand_img = AssetsManager.get_image("arrow",(100,100))
         self.score_sfx = AssetsManager.get_sound("coin")
         #self.video = AssetsManager.get_video(self.action_sets[self.enabled_action_indices[0]]["video"])
-
+        self.btn_a = Button("Menu", config.WIDTH-200, config.HEIGHT-60, 200, 60, self.font)
         self.Lhand_ani = HandAni(image=self.hand_img,mode=self.action_sets[self.enabled_action_indices[0]]["LHand"],start_pos=(640//2-125, 480//2),period=2.0)
         self.Rhand_ani = HandAni(image=self.hand_img,mode=self.action_sets[self.enabled_action_indices[0]]["RHand"],start_pos=(640//2+125, 480//2),period=2.0)
 
     def handle_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if self.btn_a.is_clicked(event):
+                self.next_scene = {"name":"Menu"}
         pass
 
     def update(self):
@@ -216,9 +220,10 @@ class Game1Scene:
 
     def draw(self):
         self.screen.fill((40, 40, 40))
+        self.btn_a.draw(self.screen)
+        pygame.draw.rect(self.screen, (0, 0, 0), (0, 0, 640, 480))
         self.draw_ui()
         self.draw_score()   
-        pygame.draw.rect(self.screen, (0, 0, 0), (0, 0, 640, 480))
         #self.draw_camera()
         if  self.state == "VIDEO":
             pass
