@@ -93,8 +93,7 @@ class Game2Scene:
             # 碰撞檢查
             for sword in self.sword_sprite_manager:
                 # 這裡的 marble_sprite_manager 包含所有彈珠
-                hit_list = pygame.sprite.spritecollide(sword, self.marble_sprite_manager, False,
-                                                       pygame.sprite.collide_mask)
+                hit_list = pygame.sprite.spritecollide(sword, self.marble_sprite_manager, False, pygame.sprite.collide_mask)
                 for m in hit_list:
                     # 增加 m.is_active() 判斷，避免重複砍中正在碎裂的彈珠
                     if m.is_active() and not m.is_broken():
