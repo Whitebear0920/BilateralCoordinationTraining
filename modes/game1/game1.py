@@ -30,6 +30,9 @@ class Game1Scene:
         self.right_wrist = None
         self.smooth_L = None
         self.smooth_R = None
+        self.LTrail = []
+        self.RTrail = []
+        self.trail_max = 30
 
         self.frame_rect = pygame.Rect(0, 0, 640, 480) #鏡頭
         self.enabled_action_indices = [4,5,6,7,8,9,10,11,12,13,2,3]    #啟用動作組
@@ -236,6 +239,23 @@ class Game1Scene:
             pygame.draw.rect(self.screen,config.GREEN,(640//2-125, 480//2,5,5))
             pygame.draw.rect(self.screen,config.GREEN,(640//2+125, 480//2,5,5))
             pass
+        for i in range(1,len(self.LTrail)):
+            pygame.draw.line(
+                self.screen,
+                (0,0,255),
+                self.LTrail[i-1],
+                self.LTrail[i],
+                max(1, i//5)
+            )
+
+        for i in range(1, len(self.RTrail)):
+            pygame.draw.line(
+                self.screen,
+                (255,0,0),
+                self.RTrail[i-1],
+                self.RTrail[i],
+                max(1, i//5)
+            )
         if self.last_snapshot.get("LPos"):
             rect = self.arrow_img.get_rect(center = self.last_snapshot["LPos"])
             self.screen.blit(self.hand_img,rect)
@@ -245,7 +265,7 @@ class Game1Scene:
             rect = self.arrow_img.get_rect(center = self.last_snapshot["RPos"])
             self.screen.blit(self.hand_img,rect)
             #pygame.draw.circle(self.screen, (255,0,0), self.last_snapshot["RPos"], 10)
-    
+        
 
     def update_data(self):
         alpha = 0.3
@@ -295,6 +315,15 @@ class Game1Scene:
             "LPos": self.smooth_L,
             "RPos": self.smooth_R
         }
+        if self.last_snapshot["LPos"]:
+            self.LTrail.append(self.last_snapshot["LPos"])
+            if len(self.LTrail) > self.trail_max:
+                self.LTrail.pop(0)
+
+        if self.last_snapshot["RPos"]:
+            self.RTrail.append(self.last_snapshot["RPos"])
+            if len(self.RTrail) > self.trail_max:
+                self.RTrail.pop(0)
     
     def main(self):
         now = time.time()
