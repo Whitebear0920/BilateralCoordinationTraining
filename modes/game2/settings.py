@@ -15,6 +15,8 @@ level_dict = {1:5, 2:7, 3:9}
 
 # event ID
 GAME2_TIMER_ALERT = pygame.event.Event(pygame.event.custom_type())
+MARBLE_NO_BREAK = pygame.event.Event(pygame.event.custom_type())
+MARBLE_BREAK = pygame.event.Event(pygame.event.custom_type())
 
 level_info_dict = {
     1:{

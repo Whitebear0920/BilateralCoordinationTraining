@@ -3,7 +3,7 @@ import colorsys
 from config import BLUE, WHITE
 
 class Button:
-    def __init__(self, text, x, y, width, height, font, color = "BLUE"):
+    def __init__(self, text, x, y, width, height, font, color = BLUE):
         self.text = text
         self.rect = pygame.Rect(x, y, width, height)
         self.font = font

@@ -10,7 +10,7 @@ class LightSword(pygame.sprite.Sprite):
         self.original_image = image  # 保留原始圖片用於旋轉
         self.image = self.original_image.copy()
         self.rect = self.image.get_rect()
-
+        self.mask = pygame.mask.from_surface(self.image)
         self.angle_info_api = angle_fun
 
         self.hand = hand
@@ -51,3 +51,4 @@ class LightSword(pygame.sprite.Sprite):
         rotation_angle = -(self.angle - 180 - 90)
         self.image = pygame.transform.rotozoom(self.original_image, rotation_angle, 1)
         self.rect = self.image.get_rect(center=new_pos)
+        self.mask = pygame.mask.from_surface(self.image)

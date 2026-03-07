@@ -52,6 +52,8 @@ class Game2Scene:
         self.start_btn = None
         self.exit_btn = None
         self.pause_btn = None
+        # info box 文字內容
+        self.info_text = "準備開始囉!!"
 
 
     def update(self): # first call in the main loop
@@ -71,25 +73,33 @@ class Game2Scene:
                 else:
                     marble_color = "BLUE"
                 print(f"generate {marble_color} marble!!")
+                temp_active = []
+                temp_broken = []
                 for m in self.marble_pool[marble_color]:
-                    if not m.is_active():
+                    temp_active.append(m.is_active())
+                    temp_broken.append(m.is_broken())
+                    if not m.is_active() and not m.is_broken():
                         m.update_offset(new_track_id=random.randint(1,3), new_speed=level_info_dict[self.level]["marble_speed"])
                         m.active_sprite()
                         break
+                print(f"active: {temp_active}")
+                print(f"broken: {temp_broken}")
+
             # Update marble_pool
             for color, ls in self.marble_pool.items():
                 for m in ls:
-                    if m.is_active():
+                    if m.is_active() or m.is_broken:
                         m.update()
             # 碰撞檢查
             for sword in self.sword_sprite_manager:
-                hit_list = pygame.sprite.spritecollide(sword, self.marble_sprite_manager, False, pygame.sprite.collide_circle)
+                # 這裡的 marble_sprite_manager 包含所有彈珠
+                hit_list = pygame.sprite.spritecollide(sword, self.marble_sprite_manager, False,
+                                                       pygame.sprite.collide_mask)
                 for m in hit_list:
-                    if m.color == "RED" and sword.hand == "LEFT":
-                        m.hit()
-                    elif m.color == "BLUE" and sword.hand == "RIGHT":
-                        m.hit()
-
+                    # 增加 m.is_active() 判斷，避免重複砍中正在碎裂的彈珠
+                    if m.is_active() and not m.is_broken():
+                        if (m.color == "RED" and sword.hand == "LEFT") or (m.color == "BLUE" and sword.hand == "RIGHT"):
+                            m.hit()
 
     def draw(self): # second call in the main loop
         self.screen.fill(config.GAME2_GRAY)
@@ -120,10 +130,16 @@ class Game2Scene:
         elif self.game_state == "START":
             if self.pause_btn is not None and self.pause_btn.is_clicked(event):
                 self._change_game_state("PAUSE")
-        # Game time over event
+        # Gaming event
         if self.game_state == "START":
             if event == GAME2_TIMER_ALERT:
+                self.info_text = "你的分數: " + str(self.score_manager.get_score()) + "!!"
+                self.score_manager.reset_score(0)
                 self._change_game_state("PAUSE")
+            if event == MARBLE_NO_BREAK: # 沒擊破 扣分
+                self.score_manager.decrease_score(10)
+            if event == MARBLE_BREAK: # 擊破 加分
+                self.score_manager.add_score(10)
 
 
     def _change_game_state(self, state):
@@ -150,7 +166,7 @@ class Game2Scene:
         pygame.draw.rect(self.screen, (255, 255, 255), bg_rect, 3)  # 白色邊框，寬度 3
 
         # 3. 繪製文字 (標題)
-        title_surf = self.font.render("GAME PAUSED", True, (255, 255, 255))
+        title_surf = self.font.render(self.info_text, True, (255, 255, 255))
         title_rect = title_surf.get_rect(center=(config.WIDTH // 2, box_y + 50))
         self.screen.blit(title_surf, title_rect)
 

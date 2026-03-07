@@ -204,7 +204,7 @@ class Game1Scene:
         self.hand_img = AssetsManager.get_image("hand",(100,100))
         self.score_sfx = AssetsManager.get_sound("coin")
         #self.video = AssetsManager.get_video(self.action_sets[self.enabled_action_indices[0]]["video"])
-        self.btn_a = Button("Menu", config.WIDTH-200, config.HEIGHT-60, 200, 60, self.font)
+        self.btn_a = Button("Menu", config.WIDTH-200, config.HEIGHT-60, 200, 60, self.font, config.BLUE)
         self.Lhand_ani = HandAni(image=self.arrow_img,mode=self.action_sets[self.enabled_action_indices[0]]["LHand"],start_pos=(640//2-125, 480//2),period=2.0)
         self.Rhand_ani = HandAni(image=self.arrow_img,mode=self.action_sets[self.enabled_action_indices[0]]["RHand"],start_pos=(640//2+125, 480//2),period=2.0)
 
