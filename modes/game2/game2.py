@@ -136,7 +136,8 @@ class Game2Scene:
                 self.score_manager.reset_score(0)
                 self._change_game_state("PAUSE")
             if event == MARBLE_NO_BREAK: # 沒擊破 扣分
-                self.score_manager.decrease_score(10)
+                #self.score_manager.decrease_score(10)
+                pass
             if event == MARBLE_BREAK: # 擊破 加分
                 self.score_manager.add_score(10)
 
