@@ -153,7 +153,7 @@ class MDP_MUL_PROCE:
         return os.path.join(base, rel_path)
 
     def pose_init(self):
-        model_path = self._resource_path(os.path.join("../assets/model", "pose_landmarker_heavy.task"))
+        model_path = self._resource_path(os.path.join("../assets/model", "pose_landmarker_full.task"))
         if not os.path.exists(model_path):
             raise ValueError(f"The {model_path} does not exist. Please check 'Pose' model.")
         self.model_kind = "pose"
