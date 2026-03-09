@@ -20,7 +20,7 @@ class AssetsManager:
     def load_common_assets(cls):
         print("[assets] Preloading Common assets...")
         # ---- Fonts ----
-        cls._load_font("main", "font/msjh.ttc", 36)
+        cls._load_font("main", "font/msjh.ttc", 36) #實際高度為42
         print("[assets] Common Preload finished.")
 
     @classmethod
@@ -74,7 +74,8 @@ class AssetsManager:
             cls._load_image("BLUE_MARBLE", "image/game2/blue_marble.png")
             cls._load_image("RED_MARBLE_BROKE", "image/game2/red_marble_broke.png")
             cls._load_image("BLUE_MARBLE_BROKE", "image/game2/blue_marble_broke.png")
-
+            cls._load_sound("sword","sound/sword.wav", volume=0.8)
+            cls._load_sound("error","sound/error.mp3", volume=0.8)
             cls.scene_asset_loaded = True
             cls.scene_asset_load_name = "Game2"
             print("[assets] Game2 Preload finished.")

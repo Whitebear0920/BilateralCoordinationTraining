@@ -2,7 +2,6 @@ import pygame
 import config
 from common import Button
 from common import AssetsManager
-import config
 
 class MenuScene:
     def __init__(self, screen):
@@ -20,7 +19,7 @@ class MenuScene:
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.btn_game1.is_clicked(event):
-                self.next_scene = {"name":"Game1"}
+                self.next_scene = {"name":"Game1Setting"}
             elif self.btn_game2.is_clicked(event):
                 self.next_scene = {"name":"Game2"}
             elif self.btn_exit.is_clicked(event):
@@ -34,4 +33,13 @@ class MenuScene:
         self.btn_game1.draw(self.screen)
         self.btn_game2.draw(self.screen)
         self.btn_exit.draw(self.screen)
+        self.draw_text("音效使用:UUi Shen/Shura LU",20,config.HEIGHT-62,isCenter=False)
         #self.btn_c.draw(self.screen)
+
+    def draw_text(self, text, x, y, color=(255,255,255), isCenter = True):
+        surf = self.button_font.render(text, True, color)
+        if isCenter:
+            rect = surf.get_rect(center=(x,y))
+            self.screen.blit(surf, rect)
+        else:
+            self.screen.blit(surf, (x, y))

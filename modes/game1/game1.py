@@ -7,20 +7,19 @@ from .hand_anime import HandAni
 from common.assets_manager import AssetsManager
 
 class Game1Scene:
-    def __init__(self, screen, gesture):
+    def __init__(self, screen, gesture, enabled_action_indices, train_duration, action_duration, break_duration):
         self.screen = screen
         self.next_scene = None
         self.gesture = gesture
-        self.next_scene = None
         
         self.state = "BREAK"
         self.current_action_index = 0
         self.state_start_time  = time.time()
 
         self.video_duration = 20.0      #影片時間
-        self.train_duration = 20.0      #練習時間
-        self.action_duration = 30.0     #動作時間
-        self.break_duration = 20.0      #休息時間
+        self.train_duration = train_duration      #練習時間
+        self.action_duration = action_duration     #動作時間
+        self.break_duration = break_duration      #休息時間
         self.window_sec = 1.0           #檢測時長
         
         self.window_start_time = None
@@ -35,7 +34,7 @@ class Game1Scene:
         self.trail_max = 150
 
         self.frame_rect = pygame.Rect(0, 0, 640, 480) #鏡頭
-        self.enabled_action_indices = [4,5,6,7,8,9,10,11,12,13,2,3]    #啟用動作組
+        self.enabled_action_indices = enabled_action_indices    #啟用動作組
         self.action_sets = [
             {#0
                 "video": "HH",
@@ -349,9 +348,9 @@ class Game1Scene:
             self.ACTION(now)
             return
         
-        if self.state == "STOP":
+        if self.state == "GAMEOVER":
             self.next_scene = {
-                "name": "Result",
+                "name": "Game1Result",
                 "data": {
                     "score": self.score,
                 }
@@ -370,9 +369,9 @@ class Game1Scene:
                 print("➡️ 進入動作組：", self.action_sets[self.enabled_action_indices[self.current_action_index]]["name"])
     
     def VIDEO(self, now):
-        if now - self.state_start_time >= self.video_duration:
-            self.state = "TRAIN"   # 或 ACTION
-            self.state_start_time = now
+    #    if now - self.state_start_time >= self.video_duration:
+    #        self.state = "TRAIN"   # 或 ACTION
+    #        self.state_start_time = now
             print("➡️ 教學影片結束")
     
     def TRAIN(self, now):
@@ -408,7 +407,7 @@ class Game1Scene:
         if now - self.state_start_time >= self.action_duration:
             self.current_action_index = (self.current_action_index + 1) % len(self.enabled_action_indices)
             if self.current_action_index == 0:
-                self.state = "STOP"
+                self.state = "GAMEOVER"
                 return
             self.Lhand_ani.mode = self.action_sets[self.enabled_action_indices[self.current_action_index]]["LHand"]
             self.Rhand_ani.mode = self.action_sets[self.enabled_action_indices[self.current_action_index]]["RHand"]
@@ -459,10 +458,10 @@ class Game1Scene:
                 remain = max(0, int(self.break_duration - (now - self.state_start_time)))
                 self.draw_text(f"狀態：休息", 700, 80, (200, 200, 0))
                 self.draw_text(f"休息倒數：{remain}s", 700, 120)
-            elif self.state == "VIDEO":
-                remain = max(0, int(self.video_duration - (now - self.state_start_time)))
-                self.draw_text(f"狀態：影片播放", 700, 80, (200, 200, 0))
-                self.draw_text(f"影片播放倒數：{remain}s", 700, 120)
+            #elif self.state == "VIDEO":
+            #    remain = max(0, int(self.video_duration - (now - self.state_start_time)))
+            #    self.draw_text(f"狀態：影片播放", 700, 80, (200, 200, 0))
+            #    self.draw_text(f"影片播放倒數：{remain}s", 700, 120)
             elif self.state == "TRAIN":
                 remain = max(0, int(self.train_duration - (now - self.state_start_time)))
                 self.draw_text(f"狀態：練習", 700, 80, (200, 200, 0))

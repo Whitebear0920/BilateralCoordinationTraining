@@ -27,6 +27,9 @@ class Game2Scene:
         self.angle_api = api
         # 縮放比例
         scale_ration = (judge_circle_radius - inner_circle_radius)  * 2
+        #VFX
+        self.sword_vfx = AssetsManager.get_sound("sword")
+        self.error_vfx = AssetsManager.get_sound("error")
         # 光劍設定
         self.red_sword = AssetsManager.get_image("RED_SWORD")
         self.blue_sword = AssetsManager.get_image("BLUE_SWORD")
@@ -136,9 +139,12 @@ class Game2Scene:
                 self.score_manager.reset_score(0)
                 self._change_game_state("PAUSE")
             if event == MARBLE_NO_BREAK: # 沒擊破 扣分
-                self.score_manager.decrease_score(10)
+                #self.score_manager.decrease_score(10)
+                self.error_vfx.play()
+                pass
             if event == MARBLE_BREAK: # 擊破 加分
                 self.score_manager.add_score(10)
+                self.sword_vfx.play()
 
 
     def _change_game_state(self, state):
@@ -168,7 +174,7 @@ class Game2Scene:
         title_surf = self.font.render(self.info_text, True, (255, 255, 255))
         title_rect = title_surf.get_rect(center=(config.WIDTH // 2, box_y + 50))
         self.screen.blit(title_surf, title_rect)
-
+        self.draw_text("左手紅色 右手藍色",config.WIDTH // 2, box_y + 90)
         # 4. 放置你的自定義按鈕
         # 使用你提供的 Button 格式
         btn_w, btn_h = 120, 45
@@ -264,4 +270,12 @@ class Game2Scene:
     def _game_level_upgrade(self):
         self.level += 1
         self.angle_step = 180 / (level_dict[self.level] - 1) if level_dict[self.level] > 1 else 0
+    
+    def draw_text(self, text, x, y, color=(255,255,255), isCenter = True):
+        surf = self.font.render(text, True, color)
+        if isCenter:
+            rect = surf.get_rect(center=(x,y))
+            self.screen.blit(surf, rect)
+        else:
+            self.screen.blit(surf, (x, y))
     # endregion

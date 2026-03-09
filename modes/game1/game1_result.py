@@ -28,7 +28,7 @@ class Game1Result:
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.btn_a.is_clicked(event):
-                self.next_scene = {"name":"Game1"}
+                self.next_scene = {"name":"Game1Setting"}
             elif self.btn_b.is_clicked(event):
                 self.next_scene = {"name":"Menu"}
             elif self.btn_c.is_clicked(event):
