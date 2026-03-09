@@ -7,7 +7,7 @@ from .hand_anime import HandAni
 from common.assets_manager import AssetsManager
 
 class Game1Scene:
-    def __init__(self, screen, gesture, enabled_action_indices):
+    def __init__(self, screen, gesture, enabled_action_indices, train_duration, action_duration, break_duration):
         self.screen = screen
         self.next_scene = None
         self.gesture = gesture
@@ -17,9 +17,9 @@ class Game1Scene:
         self.state_start_time  = time.time()
 
         self.video_duration = 20.0      #影片時間
-        self.train_duration = 20.0      #練習時間
-        self.action_duration = 30.0     #動作時間
-        self.break_duration = 20.0      #休息時間
+        self.train_duration = train_duration      #練習時間
+        self.action_duration = action_duration     #動作時間
+        self.break_duration = break_duration      #休息時間
         self.window_sec = 1.0           #檢測時長
         
         self.window_start_time = None
