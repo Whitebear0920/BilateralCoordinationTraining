@@ -7,7 +7,7 @@ from .hand_anime import HandAni
 from common.assets_manager import AssetsManager
 
 class Game1Scene:
-    def __init__(self, screen, gesture):
+    def __init__(self, screen, gesture, enabled_action_indices):
         self.screen = screen
         self.next_scene = None
         self.gesture = gesture
@@ -34,7 +34,7 @@ class Game1Scene:
         self.trail_max = 150
 
         self.frame_rect = pygame.Rect(0, 0, 640, 480) #鏡頭
-        self.enabled_action_indices = [4,5,6,7,8,9,10,11,12,13,2,3]    #啟用動作組
+        self.enabled_action_indices = enabled_action_indices    #啟用動作組
         self.action_sets = [
             {#0
                 "video": "HH",

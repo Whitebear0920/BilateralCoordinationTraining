@@ -32,7 +32,8 @@ class Game1Setting:
             btn = Button(self.action_name[i],x,y,300,50,self.font,config.BLUE)
             self.action_btn.append(btn)
         self.all_action_select_btn = Button("全選",900,180,150,100,self.font,config.BLUE)   
-        self.all_action_clear_btn = Button("清除",900,300,150,100,self.font,config.BLUE)   
+        self.all_action_clear_btn = Button("清除",900,300,150,100,self.font,config.BLUE)
+        self.start_btn = Button("開始",config.WIDTH-300,config.HEIGHT-150,200,60,self.font,config.BLUE)   
 
     def handle_event(self, event):
         for i, btn in enumerate(self.action_btn):
@@ -46,6 +47,10 @@ class Game1Setting:
             self.enabled_action = list(Game1Action)
         if self.all_action_clear_btn.is_clicked(event):
             self.enabled_action.clear()
+        if self.start_btn.is_clicked(event):
+                self.get_action_value()
+                self.next_scene = {"name":"Game1",
+                                   "enabled_action_indices":self.enabled_action_indices}
         pass
     
     def update(self):
@@ -53,10 +58,11 @@ class Game1Setting:
     
     def draw(self):
         self.screen.fill((40, 40, 40))
-        self.draw_text("設置",config.WIDTH//2,21)
+        self.draw_text("設置",config.WIDTH//2,41)
         self.draw_text("已選動作組",900,120,isCenter=False)
         self.draw_enable_action_info()
         self.draw_action_button()
+        self.start_btn.draw(self.screen)
         pass
     def draw_action_button(self):
         for i, btn in enumerate(self.action_btn):
@@ -73,6 +79,9 @@ class Game1Setting:
             row = i % 8
             self.draw_text(f"{i+1}. {self.action_name[self.enabled_action[i].value]}",1100+col*350,178+row*52,isCenter=False)
         
+    def get_action_value(self):
+        for i in self.enabled_action:
+            self.enabled_action_indices.append(i.value)
     def draw_text(self, text, x, y, color=(255,255,255), isCenter = True):
         surf = self.font.render(text, True, color)
         if isCenter:

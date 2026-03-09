@@ -42,7 +42,7 @@ def main():
                 else:
                     gesture_mgr.start("Game1")
                 AssetsManager.load_game1_assets()
-                current = Game1Scene(screen, gesture_mgr.api)
+                current = Game1Scene(screen, gesture_mgr.api, current.next_scene["enabled_action_indices"])
                 print("Game1")
             elif current.next_scene["name"] == "Game1Setting":
                 gesture_mgr.stop()
