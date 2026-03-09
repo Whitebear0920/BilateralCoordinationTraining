@@ -28,7 +28,8 @@ class Game2Scene:
         # 縮放比例
         scale_ration = (judge_circle_radius - inner_circle_radius)  * 2
         #VFX
-        self.sword_sound = AssetsManager.get_sound("sword")
+        self.sword_vfx = AssetsManager.get_sound("sword")
+        self.error_vfx = AssetsManager.get_sound("error")
         # 光劍設定
         self.red_sword = AssetsManager.get_image("RED_SWORD")
         self.blue_sword = AssetsManager.get_image("BLUE_SWORD")
@@ -139,10 +140,11 @@ class Game2Scene:
                 self._change_game_state("PAUSE")
             if event == MARBLE_NO_BREAK: # 沒擊破 扣分
                 #self.score_manager.decrease_score(10)
+                self.error_vfx.play()
                 pass
             if event == MARBLE_BREAK: # 擊破 加分
                 self.score_manager.add_score(10)
-                self.sword_sound.play()
+                self.sword_vfx.play()
 
 
     def _change_game_state(self, state):
