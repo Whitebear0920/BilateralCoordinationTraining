@@ -2,7 +2,6 @@ import pygame
 import config
 from common import Button
 from common import AssetsManager
-import config
 
 class MenuScene:
     def __init__(self, screen):
@@ -20,7 +19,7 @@ class MenuScene:
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             if self.btn_game1.is_clicked(event):
-                self.next_scene = {"name":"Game1"}
+                self.next_scene = {"name":"Game1Setting"}
             elif self.btn_game2.is_clicked(event):
                 self.next_scene = {"name":"Game2"}
             elif self.btn_exit.is_clicked(event):

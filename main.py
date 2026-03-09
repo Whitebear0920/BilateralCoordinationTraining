@@ -5,6 +5,7 @@ import multiprocessing as mp
 from modes.meau import MenuScene
 from modes.game1 import Game1Scene
 from modes.game1 import Game1Result
+from modes.game1 import Game1Setting
 from common import AssetsManager
 
 from modes.game2 import Game2Scene
@@ -43,7 +44,11 @@ def main():
                 AssetsManager.load_game1_assets()
                 current = Game1Scene(screen, gesture_mgr.api)
                 print("Game1")
-            elif current.next_scene["name"] == "Result":
+            elif current.next_scene["name"] == "Game1Setting":
+                gesture_mgr.stop()
+                current = Game1Setting(screen)
+                pass
+            elif current.next_scene["name"] == "Game1Result":
                 gesture_mgr.stop()
                 current = Game1Result(screen, current.next_scene["data"])
                 print("Result")

@@ -20,7 +20,7 @@ class AssetsManager:
     def load_common_assets(cls):
         print("[assets] Preloading Common assets...")
         # ---- Fonts ----
-        cls._load_font("main", "font/msjh.ttc", 36)
+        cls._load_font("main", "font/msjh.ttc", 36) #實際高度為42
         print("[assets] Common Preload finished.")
 
     @classmethod
