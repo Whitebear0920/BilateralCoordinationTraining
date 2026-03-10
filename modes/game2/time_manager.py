@@ -6,12 +6,14 @@ class TimeManager:
     def __init__(self, play_time=10):
         self.start_flag = False
         self.initial_time = play_time
-
+        # game time control
         self.start_time = None # 時間量測基準點
         self.count_time = 0 # record how long time passing.
         self.time_left = play_time # 剩餘時間 目標時間 - 經過的時間
         self.keep_next_call_time = None
-
+        # marble control
+        self.generate_marble_time = None
+    # region game time control
     def get_remaining_time(self):
         return self.time_left
 
@@ -47,7 +49,14 @@ class TimeManager:
                 pygame.event.post(GAME2_TIMER_ALERT)
                 self.reset_timer()
                 self.stop_timer()
-
+    # endregion
+    # region marble generate time control
+    def generate_marble(self):
+        this_time = time.time()
+        if self.generate_marble_time is None or this_time - self.generate_marble_time >= 2:
+            self.generate_marble_time = this_time
+            pygame.event.post(MARBLE_GENERATE)
+    # endregion
 
 
 

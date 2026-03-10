@@ -20,9 +20,11 @@ class Game2Scene:
         self.game_state = "PAUSE" # "PAUSE", "START"
         # 遊戲參數設定
         self.level = 1  # 遊戲等級
-        self.angle_step = 180 / (level_dict[self.level] - 1) if level_dict[self.level] > 1 else 0  # marble軌道角度控制
+        self.angle_step = 180 / (level_info_dict[self.level]["line"] - 1)  # marble軌道角度控制
         # 時間控制
         self.time_manager = TimeManager(play_time=level_info_dict[self.level]["time"])
+        self.anim_timer = 0  # 動畫計時器
+        self.anim_speed = 5  # 滑動速度
         # 角度計算API
         self.angle_api = api
         # 縮放比例
@@ -65,29 +67,8 @@ class Game2Scene:
             self.time_manager.update_timer()
             # 更新光劍
             self.sword_sprite_manager.update()
-            # Every 1 sec go to marble_pool find an inactive sprite.
-            this_generate_time = self.time_manager.get_remaining_time()
-            if self.next_generate_time is None or self.next_generate_time - this_generate_time >= 2:
-                self.next_generate_time = this_generate_time
-                # 生成一顆marble 隨機位置 隨機顏色
-                random_number = random.randint(1,2)
-                if random_number == 1:
-                    marble_color = "RED"
-                else:
-                    marble_color = "BLUE"
-                print(f"generate {marble_color} marble!!")
-                temp_active = []
-                temp_broken = []
-                for m in self.marble_pool[marble_color]:
-                    temp_active.append(m.is_active())
-                    temp_broken.append(m.is_broken())
-                    if not m.is_active() and not m.is_broken():
-                        m.update_offset(new_track_id=random.randint(1,3), new_speed=level_info_dict[self.level]["marble_speed"])
-                        m.active_sprite()
-                        break
-                print(f"active: {temp_active}")
-                print(f"broken: {temp_broken}")
-
+            # 更新marble生成
+            self.time_manager.generate_marble()
             # Update marble_pool
             for color, ls in self.marble_pool.items():
                 for m in ls:
@@ -123,21 +104,39 @@ class Game2Scene:
         # 按鈕事件
         if self.game_state == "PAUSE":
             # 偵測 Start 按鈕
-            if self.start_btn.is_clicked(event):
+            if self.level_1_btn.is_clicked(event) and level_info_dict[1]["previous_level_passed"]:
+                self.level = 1
+                self.angle_step = 180 / (level_info_dict[self.level]["line"] - 1)
+                self._change_game_state("START")
+            if self.level_2_btn.is_clicked(event) and level_info_dict[2]["previous_level_passed"]:
+                self.level = 2
+                self.angle_step = 180 / (level_info_dict[self.level]["line"] - 1)
+                self._change_game_state("START")
+            if self.level_3_btn.is_clicked(event) and level_info_dict[3]["previous_level_passed"]:
+                self.level = 3
+                self.angle_step = 180 / (level_info_dict[self.level]["line"] - 1)
                 self._change_game_state("START")
             # 偵測 Exit 按鈕
             if self.exit_btn.is_clicked(event):
                 self.next_scene = {"name":"Menu"}
-            # 偵測 ? 按鈕
+        # Gaming event
         elif self.game_state == "START":
+            # Beta
+            if event.type == pygame.KEYDOWN:
+                print("keydown")
+                if event.key == pygame.K_g:
+                    self.score_manager.add_score(100)
+            # 偵測 ? 按鈕
             if self.pause_btn is not None and self.pause_btn.is_clicked(event):
                 self._change_game_state("PAUSE")
-        # Gaming event
-        if self.game_state == "START":
+            # 時間事件
             if event == GAME2_TIMER_ALERT:
                 self.info_text = "你的分數: " + str(self.score_manager.get_score()) + "!!"
+                self._game_level_upgrade(self.score_manager.get_score())
                 self.score_manager.reset_score(0)
+                self._reset_all_marble_to_default()
                 self._change_game_state("PAUSE")
+            # 分數事件
             if event == MARBLE_NO_BREAK: # 沒擊破 扣分
                 #self.score_manager.decrease_score(10)
                 self.error_vfx.play()
@@ -145,66 +144,75 @@ class Game2Scene:
             if event == MARBLE_BREAK: # 擊破 加分
                 self.score_manager.add_score(10)
                 self.sword_vfx.play()
+            # Marble 事件
+            if event == MARBLE_GENERATE:
+                self._generate_marble()
 
-
-    def _change_game_state(self, state):
-        if state == "START":
-            self.game_state = "START"
-            self.time_manager.start_timer()
-            print("Game2 state is changed!! state: START")
-        elif state == "PAUSE":
-            self.game_state = "PAUSE"
-            self.time_manager.stop_timer()
-            print("Game2 state is changed!! state: PAUSE")
-
-    # draw info box
+    # region inner function
+    # drawing relate function
     def _draw_info_box(self):
         # 1. 定義方框大小與位置
-        box_width, box_height = 400, 300
+        box_width, box_height = 500, 300
         box_x = (config.WIDTH - box_width) // 2
         box_y = (config.HEIGHT - box_height) // 2
 
-        # 2. 畫出外框底色 (可以用稍微深一點的灰色或半透明黑色)
-        # 繪製一個矩形作為背景
+        # 2. 背景與邊框
         bg_rect = pygame.Rect(box_x, box_y, box_width, box_height)
-        pygame.draw.rect(self.screen, (50, 50, 50), bg_rect)  # 深灰色背景
-        pygame.draw.rect(self.screen, (255, 255, 255), bg_rect, 3)  # 白色邊框，寬度 3
+        pygame.draw.rect(self.screen, (50, 50, 50), bg_rect)
+        pygame.draw.rect(self.screen, (255, 255, 255), bg_rect, 3)
 
-        # 3. 繪製文字 (標題)
-        title_surf = self.font.render(self.info_text, True, (255, 255, 255))
-        title_rect = title_surf.get_rect(center=(config.WIDTH // 2, box_y + 50))
-        self.screen.blit(title_surf, title_rect)
-        self.draw_text("左手紅色 右手藍色",config.WIDTH // 2, box_y + 90)
-        # 4. 放置你的自定義按鈕
-        # 使用你提供的 Button 格式
+        # --- 3. 動態標題動畫邏輯 ---
+        self.anim_timer += 1  # 每一幀增加計時
+
+        # 設定字體（建議標題用大一點的字）
+        title_font = pygame.font.SysFont("microsoftjhenghei", 100, bold=True)
+        target_y = box_y - 80  # 標題最終停留的垂直位置（方框上方）
+        start_y = -100  # 初始位置（螢幕外）
+
+        # 定義四個字的屬性：文字、顏色、延遲時間、當前x位置偏移
+        # 延遲時間讓字體有「一個接一個」的感覺
+        elements = [
+            {"text": "光", "color": config.RED, "delay": 0, "offset_x": -165},
+            {"text": "劍", "color": config.BLUE, "delay": 10, "offset_x": -55},
+            {"text": "遊戲", "color": (255, 255, 255), "delay": 25, "offset_x": 105}
+        ]
+
+        for item in elements:
+            # 計算插值：如果計時器超過了延遲，才開始移動
+            elapsed = max(0, self.anim_timer - item["delay"])
+            # 使用簡單的移動邏輯，直到到達 target_y
+            current_y = min(target_y, start_y + elapsed * self.anim_speed)
+
+            surf = title_font.render(item["text"], True, item["color"])
+            rect = surf.get_rect(center=(config.WIDTH // 2 + item["offset_x"], current_y))
+            self.screen.blit(surf, rect)
+
+        # --- 原本的內容 ---
+        # 提示文字
+        self._draw_text("左手紅色 右手藍色", config.WIDTH // 2, box_y + 90)
+
+        # 4. 按鈕處理
         btn_w, btn_h = 120, 45
+        self.level_1_btn = Button("LV. 1", config.WIDTH // 2 - btn_w * 1.5 - 10, box_y + 120, btn_w, btn_h, self.font,
+                                config.GREEN if level_info_dict[1]["previous_level_passed"] else config.GRAY)
+        self.level_2_btn = Button("LV. 2", config.WIDTH // 2 - btn_w // 2, box_y + 120, btn_w, btn_h, self.font,
+                                config.GREEN if level_info_dict[2]["previous_level_passed"] else config.GRAY)
+        self.level_3_btn = Button("LV. 3", config.WIDTH // 2 + btn_w // 2 + 10, box_y + 120, btn_w, btn_h, self.font,
+                                config.GREEN if level_info_dict[3]["previous_level_passed"] else config.GRAY)
+        self.exit_btn = Button("Exit", config.WIDTH // 2 - btn_w // 2, box_y + 190, btn_w, btn_h, self.font, config.RED)
 
-        # Start (或 Resume) 按鈕
-        self.start_btn = Button("Start",
-                            config.WIDTH // 2 - btn_w // 2,
-                            box_y + 120,
-                            btn_w, btn_h,
-                            self.font, config.GREEN)
-
-        # Exit 按鈕
-        self.exit_btn = Button("Exit",
-                          config.WIDTH // 2 - btn_w // 2,
-                          box_y + 190,
-                          btn_w, btn_h,
-                          self.font, config.RED)
-
-        # 執行按鈕的繪製方法 (假設你的 Button 類別有 draw 方法)
-        self.start_btn.draw(self.screen)
+        self.level_1_btn.draw(self.screen)
+        self.level_2_btn.draw(self.screen)
+        self.level_3_btn.draw(self.screen)
         self.exit_btn.draw(self.screen)
 
-    # region inner function
     def _draw_ui(self):
         # 1. 準備常用參數
         center = pygame.Vector2(circle_center_x, circle_center_y)
         t = pygame.time.get_ticks() / 1000.0
         # 計算旋轉角度 (180度平分)
         # 注意：Pygame 的 Vector 旋轉角度正值是順時針，0度是指向右方 (1, 0)
-        num_lines = level_dict[self.level]
+        num_lines = level_info_dict[self.level]["line"]
         angle_step = 180 / (num_lines - 1) if num_lines > 1 else 0
 
         # --- 繪製順序：先畫線，再畫圓 (解決凸出問題) ---
@@ -248,6 +256,14 @@ class Game2Scene:
                               config.HEIGHT * 0.05 - 5, self.font, config.GAME2_PAUSE_BTN)
         self.pause_btn.draw(self.screen)
 
+    def _draw_text(self, text, x, y, color=(255,255,255), isCenter = True):
+        surf = self.font.render(text, True, color)
+        if isCenter:
+            rect = surf.get_rect(center=(x,y))
+            self.screen.blit(surf, rect)
+        else:
+            self.screen.blit(surf, (x, y))
+
     def _draw_status_box(self, text, pos, anchor, color="WHITE"):
         text_surf = self.font.render(text, True, color)
         text_rect = text_surf.get_rect(**{anchor: pos})
@@ -260,22 +276,51 @@ class Game2Scene:
         # 畫邊框
         pygame.draw.rect(self.screen, color, bg_rect, width=2)
         self.screen.blit(text_surf, text_rect)
-
+    # control relate
     def _rescale_ration(self, image, target_height):
         old_width, old_height = image.get_width(), image.get_height()
         ratio = target_height / old_height
         target_width = int(old_width * ratio)
         return pygame.transform.smoothscale(image, (target_width, target_height))
 
-    def _game_level_upgrade(self):
-        self.level += 1
-        self.angle_step = 180 / (level_dict[self.level] - 1) if level_dict[self.level] > 1 else 0
-    
-    def draw_text(self, text, x, y, color=(255,255,255), isCenter = True):
-        surf = self.font.render(text, True, color)
-        if isCenter:
-            rect = surf.get_rect(center=(x,y))
-            self.screen.blit(surf, rect)
+    def _change_game_state(self, state):
+        if state == "START":
+            self.game_state = "START"
+            self.time_manager.start_timer()
+            print("Game2 state is changed!! state: START")
+        elif state == "PAUSE":
+            self.game_state = "PAUSE"
+            self.time_manager.stop_timer()
+            print("Game2 state is changed!! state: PAUSE")
+
+    def _game_level_upgrade(self, score):
+        if score > level_info_dict[self.level]["pass_score"]:
+            if self.level < 3:
+                level_info_dict[self.level+1]["previous_level_passed"] = True
+    def _generate_marble(self):
+        # Every 1 sec go to marble_pool find an inactive sprite.
+            # 生成一顆marble 隨機位置 隨機顏色
+        random_number = random.randint(1, 2)
+        if random_number == 1:
+            marble_color = "RED"
         else:
-            self.screen.blit(surf, (x, y))
+            marble_color = "BLUE"
+        temp_active = []
+        temp_broken = []
+        for m in self.marble_pool[marble_color]:
+            temp_active.append(m.is_active())
+            temp_broken.append(m.is_broken())
+            if not m.is_active() and not m.is_broken():
+                m.update_offset(new_angle_step=self.angle_step,
+                                new_track_id=random.randint(1, level_info_dict[self.level]["line"]-2),
+                                new_speed=level_info_dict[self.level]["marble_speed"])
+                m.active_sprite()
+                break
+
+    def _reset_all_marble_to_default(self):
+        # Update marble_pool
+        for color, ls in self.marble_pool.items():
+            for m in ls:
+                m.reset_to_start_state()
+                m.unactive_sprite()
     # endregion

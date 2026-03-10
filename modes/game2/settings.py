@@ -11,18 +11,23 @@ judge_circle_radius = int(inner_circle_radius * 1.5)
 
 circle_center_x, circle_center_y = config.WIDTH // 2, config.HEIGHT
 
-level_dict = {1:5, 2:7, 3:9}
+
 
 # event ID
 GAME2_TIMER_ALERT = pygame.event.Event(pygame.event.custom_type())
 MARBLE_NO_BREAK = pygame.event.Event(pygame.event.custom_type())
 MARBLE_BREAK = pygame.event.Event(pygame.event.custom_type())
+MARBLE_GENERATE = pygame.event.Event(pygame.event.custom_type())
 
+# Level dictionary
 level_info_dict = {
     1:{
-        "time":60,
+        "time":90,
+        "line":5,
         "pass_score":300,
         "marble_speed":10,
+        "marble_generate_speed":2,
+        "previous_level_passed":True,
         "marble_map":{
             "1":[0,1,0,0,2,0,0,1,0,0,2,0,0,1,0,2,0,0,0,0,0,1,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
             "2":[0,0,1,0,0,2,0,0,2,0,0,1,0,1,0,2,0,1,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
@@ -31,8 +36,11 @@ level_info_dict = {
     },
     2:{
         "time":90,
+        "line": 5,
         "pass_score":500,
-        "marble_speed":10,
+        "marble_speed":20,
+        "marble_generate_speed": 2,
+        "previous_level_passed": False,
         "marble_map":{
             "1":[],
             "2":[],
@@ -41,8 +49,11 @@ level_info_dict = {
     },
     3:{
         "time":90,
-        "pass_score":500,
-        "marble_speed":10,
+        "line": 7,
+        "pass_score":700,
+        "marble_speed":15,
+        "marble_generate_speed": 1,
+        "previous_level_passed": False,
         "marble_map": {
             "1":[],
             "2":[],
