@@ -26,7 +26,7 @@ level_info_dict = {
         "line":5,
         "pass_score":300,
         "marble_speed":10,
-        "marble_generate_speed":2,
+        "marble_generate_speed":2, # not be used
         "previous_level_passed":True,
         "marble_map":{
             "1":[0,1,0,0,2,0,0,1,0,0,2,0,0,1,0,2,0,0,0,0,0,1,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
@@ -37,9 +37,9 @@ level_info_dict = {
     2:{
         "time":90,
         "line": 5,
-        "pass_score":500,
-        "marble_speed":20,
-        "marble_generate_speed": 2,
+        "pass_score":350,
+        "marble_speed":25,
+        "marble_generate_speed": 2,# not be used
         "previous_level_passed": False,
         "marble_map":{
             "1":[],
@@ -50,9 +50,9 @@ level_info_dict = {
     3:{
         "time":90,
         "line": 7,
-        "pass_score":700,
-        "marble_speed":15,
-        "marble_generate_speed": 1,
+        "pass_score":475,
+        "marble_speed":20,
+        "marble_generate_speed": 1,# not be used
         "previous_level_passed": False,
         "marble_map": {
             "1":[],
