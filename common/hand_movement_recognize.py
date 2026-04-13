@@ -27,7 +27,6 @@ class HandMovementRecognize:
         with self.frame_lock:
             frame = None if self.now_frame is None else self.now_frame.copy()
 
-
         with self.movement_recognize.data_lock:
             if self.game == "Game1":
                 return {
@@ -41,8 +40,8 @@ class HandMovementRecognize:
             elif self.game == "Game2":
                 return {
                     "now_frame_data" : frame,
-                    "left_arm_angle" : self.movement_recognize.left_arm_angle,
-                    "right_arm_angle": self.movement_recognize.right_arm_angle
+                    "left_finger_angle" : self.movement_recognize.left_finger_angle,
+                    "right_finger_angle": self.movement_recognize.right_finger_angle
                 }
 
     def clear(self):
@@ -72,7 +71,10 @@ class HandMovementRecognize:
 
         def run_mediapipe(self):
             self.mdpp = MDP_MUL_PROCE()
-            self.mdpp.pose_init()
+            if self.hmr.game == "Game1":
+                self.mdpp.pose_init()
+            elif self.hmr.game == "Game2":
+                self.mdpp.hands_init()
             self.mdpp.start_worker()
 
         def camera_catch_frame_and_input_mdpp_loop(self):
@@ -152,11 +154,11 @@ class HandMovementRecognize:
                 self.left_vertical_loop = 0
                 self.right_vertical_loop = 0
             else:
-                self.left_arm_angle_method = game2_method.AngleRecognizer()
-                self.right_arm_angle_method = game2_method.AngleRecognizer()
+                self.left_finger_angle_method = game2_method.AngleRecognizer()
+                self.right_finger_angle_method = game2_method.AngleRecognizer()
 
-                self.left_arm_angle = 270 - 90 // 2 # 270 朝上 180 朝左 360 朝右
-                self.right_arm_angle = 270 + 90 // 2
+                self.left_finger_angle = 270 - 90 // 2 # 270 朝上 180 朝左 360 朝右
+                self.right_finger_angle = 270 + 90 // 2
 
             self.movement_recognize_main()
 
@@ -243,23 +245,48 @@ class HandMovementRecognize:
                     break
                 if self.hmr.run_flag:
                     this_frame = self.hmr.camera_and_mdpp_inst.mdpp.get_result(self.recognize_frame_num)
-                    if this_frame is not None:
-                        if len(this_frame["pose_landmarks"]) > 0:
-                            left_wrist = this_frame["pose_landmarks"][15][0:2]
-                            left_elbow = this_frame["pose_landmarks"][13][0:2]
-                            right_wrist = this_frame["pose_landmarks"][16][0:2]
-                            right_elbow = this_frame["pose_landmarks"][14][0:2]
 
-                            t_sec = time.time()
+                    # 確保有資料且包含 hand_landmarks 鍵值
+                    if this_frame is not None and "hand_landmarks" in this_frame:
+                        hands_data = this_frame["hand_landmarks"]
+                        t_sec = time.time()
 
-                            new_left_angle = self.left_arm_angle_method.update(wrist=left_wrist, elbow=left_elbow, t_sec=t_sec)
-                            new_right_angle = self.right_arm_angle_method.update(wrist=right_wrist, elbow=right_elbow, t_sec=t_sec)
-                            with self.data_lock:
-                                self.left_arm_angle = new_left_angle
-                                self.right_arm_angle = new_right_angle
+                        # 初始化當前幀的角度
+                        new_l_angle = None
+                        new_r_angle = None
+
+                        # 遍歷偵測到的手部字典
+                        for hand_info in hands_data:
+                            # 1. 取得這隻手的類型 ("Left" 或 "Right")
+                            hand_type = hand_info["type"]
+
+                            # 2. 從字典中提取座標清單 (landmarks 是 21 個點的 list)
+                            # Index 0 是手腕, Index 8 是食指尖
+                            landmarks = hand_info["landmarks"]
+                            wrist = landmarks[0][0:2]
+                            index_tip = landmarks[8][0:2]
+
+                            # 3. 根據左右手標籤計算並更新
+                            if hand_type == "Left":
+                                new_l_angle = self.left_finger_angle_method.update(
+                                    wrist=wrist, index=index_tip, t_sec=t_sec
+                                )
+                            elif hand_type == "Right":
+                                new_r_angle = self.right_finger_angle_method.update(
+                                    wrist=wrist, index=index_tip, t_sec=t_sec
+                                )
+
+                        # 4. 寫回類別變數
+                        with self.data_lock:
+                            if new_l_angle is not None:
+                                self.left_finger_angle = new_l_angle
+                            if new_r_angle is not None:
+                                self.right_finger_angle = new_r_angle
 
                         self.recognize_frame_num += 1
                     else:
+                        # 若無結果，微小延遲避免空轉佔用 CPU
+                        time.sleep(0.001)
                         continue
                 else:
                     time.sleep(0.001)

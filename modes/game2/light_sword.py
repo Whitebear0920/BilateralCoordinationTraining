@@ -23,15 +23,15 @@ class LightSword(pygame.sprite.Sprite):
 
         # 3. 自動移動參數
         if hand == "LEFT":
-            self.angle = self.angle_info_api()["left_arm_angle"]
+            self.angle = self.angle_info_api()["left_finger_angle"]
         elif hand == "RIGHT":
-            self.angle = self.angle_info_api()["right_arm_angle"]
+            self.angle = self.angle_info_api()["right_finger_angle"]
 
 
     def update(self):
         # A. 取得目標角度 (來自 Mediapipe)
         data = self.angle_info_api()
-        target_angle = data["left_arm_angle"] if self.hand == "LEFT" else data["right_arm_angle"]
+        target_angle = data["left_finger_angle"] if self.hand == "LEFT" else data["right_finger_angle"]
 
         # B. 計算最短路徑的角度差 (處理 0/360 度跨越問題)
         # 這是為了確保從 359 度移動到 1 度時，是前進 2 度而不是後退 358 度
