@@ -187,7 +187,6 @@ class Game2Scene:
             rect = surf.get_rect(center=(config.WIDTH // 2 + item["offset_x"], current_y))
             self.screen.blit(surf, rect)
 
-        # --- 原本的內容 ---
         # 提示文字
         self._draw_text("左手紅色 右手藍色", config.WIDTH // 2, box_y + 90)
 
