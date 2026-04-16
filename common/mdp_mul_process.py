@@ -110,7 +110,7 @@ def _serialize_result(model_kind, result):
         return {}
 
 class MDP_MUL_PROCE:
-    def __init__(self, MODEL_ROOT_PATH=r".\Assets\model", process_nums=4):
+    def __init__(self, MODEL_ROOT_PATH=r".\assets\model", process_nums=4):
         mp.set_start_method("spawn", force=True)
 
         if not os.path.exists(MODEL_ROOT_PATH):

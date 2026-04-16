@@ -137,7 +137,7 @@ class Game2Scene:
                 self._reset_all_marble_to_default()
                 self._change_game_state("PAUSE")
             # 分數事件
-            if event == MARBLE_NO_BREAK: # 沒擊破 扣分
+            if event == MARBLE_NO_BREAK: # 沒擊破 扣分 # !!!! Not active
                 #self.score_manager.decrease_score(10)
                 self.error_vfx.play()
                 pass
@@ -150,6 +150,7 @@ class Game2Scene:
 
     # region inner function
     # drawing relate function
+    ## 關卡選擇畫面
     def _draw_info_box(self):
         # 1. 定義方框大小與位置
         box_width, box_height = 500, 300
@@ -204,7 +205,7 @@ class Game2Scene:
         self.level_2_btn.draw(self.screen)
         self.level_3_btn.draw(self.screen)
         self.exit_btn.draw(self.screen)
-
+    ## 繪製圓形線條與暫停按鈕以及倒數計時器
     def _draw_ui(self):
         # 1. 準備常用參數
         center = pygame.Vector2(circle_center_x, circle_center_y)
@@ -234,12 +235,20 @@ class Game2Scene:
         pygame.draw.circle(self.screen, "CYAN", center, judge_circle_radius, 3)
 
         # 4. 繪製文字 UI (建議寫成小工具函數減少重複代碼)
-        self._draw_status_box("".join(["分數：",
-                                      str(self.score_manager.get_score()),
-                                      "/",
-                                      str(level_info_dict[self.level]["pass_score"])]),
-                              (config.WIDTH * 0.05, config.HEIGHT * 0.05),
-                              "topleft")
+        current_score = self.score_manager.get_score()
+        pass_score = level_info_dict[self.level]["pass_score"]
+
+        # 判斷當前分數的顏色
+        score_color = "GREEN" if current_score >= pass_score else "RED"
+
+        # 拆成三個片段
+        parts = [
+            ("分數：", "WHITE"),
+            (str(current_score), score_color),
+            (f" / {pass_score}", "WHITE")
+        ]
+
+        self._draw_status_box(parts, (config.WIDTH * 0.05, config.HEIGHT * 0.05), "topleft")
 
         time_val = self.time_manager.get_remaining_time()
         time_str = f"剩餘時間：{int(time_val) // 60:02d}:{int(time_val % 60):02d}"
@@ -254,7 +263,7 @@ class Game2Scene:
         self.pause_btn = Button("？", config.WIDTH * 0.96, config.HEIGHT * 0.05, config.WIDTH * 0.03,
                               config.HEIGHT * 0.05 - 5, self.font, config.GAME2_PAUSE_BTN)
         self.pause_btn.draw(self.screen)
-
+    ## 繪製提示文字
     def _draw_text(self, text, x, y, color=(255,255,255), isCenter = True):
         surf = self.font.render(text, True, color)
         if isCenter:
@@ -262,19 +271,52 @@ class Game2Scene:
             self.screen.blit(surf, rect)
         else:
             self.screen.blit(surf, (x, y))
-
+    ## 繪製分數
     def _draw_status_box(self, text, pos, anchor, color="WHITE"):
-        text_surf = self.font.render(text, True, color)
-        text_rect = text_surf.get_rect(**{anchor: pos})
+        """
+        text: 可以是字串 "100" 或 列表 [("A", "RED"), ("B", "WHITE")]
+        color: 當 text 是字串時使用的顏色，預設為白色
+        """
+        # --- 第一步：統一格式 ---
+        # 如果傳進來的是一般字串，我們把它變成 [(字串, 顏色)] 的格式
+        if isinstance(text, str):
+            text_parts = [(text, color)]
+        else:
+            # 如果傳進來的是 list，就直接使用
+            text_parts = text
 
+        # --- 第二步：計算總大小與準備畫布 ---
+        surfaces = []
+        total_width = 0
+        max_height = 0
+
+        for txt, clr in text_parts:
+            surf = self.font.render(txt, True, clr)
+            surfaces.append(surf)
+            total_width += surf.get_width()
+            max_height = max(max_height, surf.get_height())
+
+        # 建立一個透明組合畫布
+        combined_surf = pygame.Surface((total_width, max_height), pygame.SRCALPHA)
+        x_offset = 0
+        for surf in surfaces:
+            combined_surf.blit(surf, (x_offset, 0))
+            x_offset += surf.get_width()
+
+        # --- 第三步：畫框與背景 ---
+        text_rect = combined_surf.get_rect(**{anchor: pos})
         bg_rect = text_rect.inflate(20, 10)
+
+        # 畫背景
         bg_surf = pygame.Surface((bg_rect.width, bg_rect.height), pygame.SRCALPHA)
-        pygame.draw.rect(bg_surf, (0, 0, 0, 150), [0, 0, bg_rect.width, bg_rect.height])  # 150 是透明度
+        pygame.draw.rect(bg_surf, (0, 0, 0, 150), [0, 0, bg_rect.width, bg_rect.height])
         self.screen.blit(bg_surf, bg_rect.topleft)
 
-        # 畫邊框
-        pygame.draw.rect(self.screen, color, bg_rect, width=2)
-        self.screen.blit(text_surf, text_rect)
+        # 畫邊框（這裡固定用白色，或者如果你希望邊框跟著顏色走，可以用 color 或 text_parts[0][1]）
+        pygame.draw.rect(self.screen, "WHITE", bg_rect, width=2)
+
+        # 把文字畫上去
+        self.screen.blit(combined_surf, text_rect)
     # control relate
     def _rescale_ration(self, image, target_height):
         old_width, old_height = image.get_width(), image.get_height()
@@ -301,9 +343,9 @@ class Game2Scene:
             # 生成一顆marble 隨機位置 隨機顏色
         random_number = random.randint(1, 2)
         if random_number == 1:
-            marble_color = "RED"
+            marble_color = "RED" # left area
         else:
-            marble_color = "BLUE"
+            marble_color = "BLUE" # right area
         temp_active = []
         temp_broken = []
         for m in self.marble_pool[marble_color]:
@@ -311,7 +353,7 @@ class Game2Scene:
             temp_broken.append(m.is_broken())
             if not m.is_active() and not m.is_broken():
                 m.update_offset(new_angle_step=self.angle_step,
-                                new_track_id=random.randint(1, level_info_dict[self.level]["line"]-2),
+                                new_track_id=random.randint(*(1, (level_info_dict[self.level]["line"] - 2) // 2 + 1) if marble_color == "RED" else ((level_info_dict[self.level]["line"] - 2) // 2 + 1, level_info_dict[self.level]["line"] - 2)),
                                 new_speed=level_info_dict[self.level]["marble_speed"])
                 m.active_sprite()
                 break
