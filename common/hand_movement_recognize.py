@@ -72,7 +72,7 @@ class HandMovementRecognize:
         def run_mediapipe(self):
             self.mdpp = MDP_MUL_PROCE()
             if self.hmr.game == "Game1":
-                self.mdpp.pose_init()
+                self.mdpp.hands_init()
             elif self.hmr.game == "Game2":
                 self.mdpp.hands_init()
             self.mdpp.start_worker()
@@ -168,73 +168,88 @@ class HandMovementRecognize:
                     break
                 if self.hmr.run_flag:
                     this_frame = self.hmr.camera_and_mdpp_inst.mdpp.get_result(self.recognize_frame_num)
-                    if this_frame is not None:
-                        if len(this_frame["pose_landmarks"]) > 0:
-                            left_shoulder_xy = this_frame["pose_landmarks"][11][0:2]
-                            right_shoulder_xy = this_frame["pose_landmarks"][12][0:2]
-                            left_elbow_xy = this_frame["pose_landmarks"][13][0:2]
-                            right_elbow_xy = this_frame["pose_landmarks"][14][0:2]
-                            left_wrist_xy = this_frame["pose_landmarks"][15][0:2]
-                            right_wrist_xy = this_frame["pose_landmarks"][16][0:2]
-                            self.left_wrist_xy = left_wrist_xy
-                            self.right_wrist_xy = right_wrist_xy
 
-                            t_sec = time.time()
-                            # horizontal movement
-                            left_h_new_loop = self.left_horizontal_method.update(shoulder_xy=left_shoulder_xy,
-                                                                                 wrist_xy=left_wrist_xy, t_sec=t_sec)
-                            right_h_new_loop = self.right_horizontal_method.update(shoulder_xy=right_shoulder_xy,
-                                                                                   wrist_xy=right_wrist_xy, t_sec=t_sec)
-                            if left_h_new_loop > 0:
-                                with self.data_lock:
-                                    self.left_horizontal_loop = self.left_horizontal_method.count
-                            if right_h_new_loop > 0:
-                                with self.data_lock:
-                                    self.right_horizontal_loop = self.right_horizontal_method.count
+                    if this_frame is not None and "hand_landmarks" in this_frame:
+                        hands_data = this_frame["hand_landmarks"]
+                        t_sec = time.time()
 
-                            # vertical movement
-                            left_v_new_loop = self.left_vertical_method.update(shoulder_xy=left_shoulder_xy,
-                                                                               wrist_xy=left_wrist_xy, t_sec=t_sec)
-                            right_v_new_loop = self.right_vertical_method.update(shoulder_xy=right_shoulder_xy,
-                                                                                 wrist_xy=right_wrist_xy, t_sec=t_sec)
-                            if left_v_new_loop > 0:
-                                with self.data_lock:
-                                    self.left_vertical_loop = self.left_vertical_method.count
-                            if right_v_new_loop > 0:
-                                with self.data_lock:
-                                    self.right_vertical_loop = self.right_vertical_method.count
+                        for hand_info in hands_data:
+                            hand_type = hand_info["type"]
+                            landmarks = hand_info["landmarks"]
 
-                            # counter clockwise circle movement
-                            left_ccw_new_loop = self.left_ccw_circle_method.update(shoulder_xy=left_shoulder_xy,
-                                                                                   elbow_xy=left_elbow_xy,
-                                                                                   wrist_xy=left_wrist_xy, t_sec=t_sec)
-                            right_ccw_new_loop = self.right_ccw_circle_method.update(shoulder_xy=right_shoulder_xy,
-                                                                                     elbow_xy=right_elbow_xy,
-                                                                                     wrist_xy=right_wrist_xy,
-                                                                                     t_sec=t_sec)
-                            if left_ccw_new_loop > 0:
-                                with self.data_lock:
-                                    self.left_ccw_circle_loop = self.left_ccw_circle_method.total
-                            if right_ccw_new_loop > 0:
-                                with self.data_lock:
-                                    self.right_ccw_circle_loop = self.right_ccw_circle_method.total
+                            # --- 重新定義點位 (以中指為基準) ---
+                            # Index 0: 手腕 (Origin)
+                            # Index 9: 中指根部 MCP (Reference for Scale)
+                            # Index 12: 中指指尖 Tip (Target Point)
+                            wrist_point = landmarks[0][0:2]
+                            middle_mcp = landmarks[9][0:2]
+                            middle_tip = landmarks[12][0:2]
 
-                            # clockwise circle movement
-                            left_cw_new_loop = self.left_cw_circle_method.update(shoulder_xy=left_shoulder_xy,
-                                                                                 elbow_xy=left_elbow_xy,
-                                                                                 wrist_xy=left_wrist_xy, t_sec=t_sec)
-                            right_cw_new_loop = self.right_cw_circle_method.update(shoulder_xy=right_shoulder_xy,
-                                                                                   elbow_xy=right_elbow_xy,
-                                                                                   wrist_xy=right_wrist_xy, t_sec=t_sec)
-                            if left_cw_new_loop > 0:
-                                with self.data_lock:
-                                    self.left_cw_circle_loop = self.left_cw_circle_method.total
-                            if right_cw_new_loop > 0:
-                                with self.data_lock:
-                                    self.right_cw_circle_loop = self.right_cw_circle_method.total
+                            if hand_type == "Left":
+                                self.left_wrist_xy = middle_tip  # 更新紀錄點
+
+                                # 1. 水平移動 (Origin, Target, Time)
+                                l_h_loop = self.left_horizontal_method.update(
+                                    origin_xy=wrist_point, target_xy=middle_tip, t_sec=t_sec)
+                                if l_h_loop > 0:
+                                    with self.data_lock:
+                                        self.left_horizontal_loop = self.left_horizontal_method.count
+
+                                # 2. 鉛直移動 (Origin, Target, Time)
+                                l_v_loop = self.left_vertical_method.update(
+                                    origin_xy=wrist_point, target_xy=middle_tip, t_sec=t_sec)
+                                if l_v_loop > 0:
+                                    with self.data_lock:
+                                        self.left_vertical_loop = self.left_vertical_method.count
+
+                                # 3. 逆時針圓圈 (Origin, Reference, Target, Time)
+                                l_ccw_loop = self.left_ccw_circle_method.update(
+                                    origin_xy=wrist_point, target_xy=middle_tip)
+                                if l_ccw_loop > 0:
+                                    with self.data_lock:
+                                        self.left_ccw_circle_loop = self.left_ccw_circle_method.total
+
+                                # 4. 順時針圓圈
+                                l_cw_loop = self.left_cw_circle_method.update(
+                                    origin_xy=wrist_point, target_xy=middle_tip)
+                                if l_cw_loop > 0:
+                                    with self.data_lock:
+                                        self.left_cw_circle_loop = self.left_cw_circle_method.total
+
+                            elif hand_type == "Right":
+                                self.right_wrist_xy = middle_tip
+
+                                # 1. 水平移動
+                                r_h_loop = self.right_horizontal_method.update(
+                                    origin_xy=wrist_point, target_xy=middle_tip, t_sec=t_sec)
+                                if r_h_loop > 0:
+                                    with self.data_lock:
+                                        self.right_horizontal_loop = self.right_horizontal_method.count
+
+                                # 2. 鉛直移動
+                                r_v_loop = self.right_vertical_method.update(
+                                    origin_xy=wrist_point, target_xy=middle_tip, t_sec=t_sec)
+                                if r_v_loop > 0:
+                                    with self.data_lock:
+                                        self.right_vertical_loop = self.right_vertical_method.count
+
+                                # 3. 逆時針圓圈
+                                r_ccw_loop = self.right_ccw_circle_method.update(
+                                    origin_xy=wrist_point, target_xy=middle_tip)
+                                if r_ccw_loop > 0:
+                                    with self.data_lock:
+                                        self.right_ccw_circle_loop = self.right_ccw_circle_method.total
+
+                                # 4. 順時針圓圈
+                                r_cw_loop = self.right_cw_circle_method.update(
+                                    origin_xy=wrist_point, target_xy=middle_tip)
+                                if r_cw_loop > 0:
+                                    with self.data_lock:
+                                        self.right_cw_circle_loop = self.right_cw_circle_method.total
 
                         self.recognize_frame_num += 1
                     else:
+                        time.sleep(0.001)
                         continue
                 else:
                     time.sleep(0.001)
