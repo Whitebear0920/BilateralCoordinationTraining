@@ -272,23 +272,30 @@ class HandMovementRecognize:
 
                         # 遍歷偵測到的手部字典
                         for hand_info in hands_data:
-                            # 1. 取得這隻手的類型 ("Left" 或 "Right")
                             hand_type = hand_info["type"]
-
-                            # 2. 從字典中提取座標清單 (landmarks 是 21 個點的 list)
-                            # Index 0 是手腕, Index 8 是食指尖
                             landmarks = hand_info["landmarks"]
-                            wrist = landmarks[0][0:2]
-                            index_tip = landmarks[8][0:2]
 
-                            # 3. 根據左右手標籤計算並更新
+                            # --- 提取新的關鍵點 ---
+                            # 中指：根部(9), 指尖(12)
+                            m_base = landmarks[9][0:2]
+                            m_tip = landmarks[12][0:2]
+
+                            # 小指：根部(17), 指尖(20)
+                            p_base = landmarks[17][0:2]
+                            p_tip = landmarks[20][0:2]
+
+                            # 呼叫更新方法，傳入兩組坐標
                             if hand_type == "Left":
                                 new_l_angle = self.left_finger_angle_method.update(
-                                    wrist=wrist, index=index_tip, t_sec=t_sec
+                                    mid_base=m_base, mid_tip=m_tip,
+                                    pinky_base=p_base, pinky_tip=p_tip,
+                                    t_sec=t_sec
                                 )
                             elif hand_type == "Right":
                                 new_r_angle = self.right_finger_angle_method.update(
-                                    wrist=wrist, index=index_tip, t_sec=t_sec
+                                    mid_base=m_base, mid_tip=m_tip,
+                                    pinky_base=p_base, pinky_tip=p_tip,
+                                    t_sec=t_sec
                                 )
 
                         # 4. 寫回類別變數

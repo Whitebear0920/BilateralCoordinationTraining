@@ -5,42 +5,41 @@ class AngleRecognizer:
     def __init__(self):
         pass
 
-    def update(self, wrist, index, t_sec):
+    def _calculate_segment_angle(self, base, tip):
         """
-        計算食指尖相對於手腕的角度
-        wrist: [x, y] 手腕座標
-        index: [x, y] 食指尖座標
+        內部分析函數：計算單一手指段的角度
+        base: [x, y] 手指根部 (MCP)
+        tip: [x, y] 指尖
         """
-        # dx: 食指在手腕的左右偏移量
-        dx = index[0] - wrist[0]
+        dx = tip[0] - base[0]
+        # MediaPipe Y 軸向下為正，所以用 base - tip 讓向上向量變為正值
+        dy = base[1] - tip[1]
 
-        # dy: 重要！MediaPipe 的 Y 軸向下為正
-        # 當食指在手腕「之上」時，index[1] 會小於 wrist[1]
-        # 因此 wrist[1] - index[1] 會得到正值，代表向上向量
-        dy = wrist[1] - index[1]
-
-        # math.atan2(dy, dx) 會回傳弧度 (-pi 到 pi)
-        # 轉換為角度後：
-        # 90度 代表正上方 (食指垂直朝上)
-        # 0度 代表水平向右
-        # 180度 代表水平向左
+        # 使用 atan2 取得弧度並轉角度
         angle = math.degrees(math.atan2(dy, dx))
 
-        # 將角度轉換為 0 ~ 360 度格式
-        # 這樣正上方依然是 90，正下方會變成 270
+        # 標準化為 0 ~ 360 度
         if angle < 0:
             angle += 360
 
-        # --- 移除原本的限制邏輯 ---
-        # 如果你希望食指主要在上方活動 (0 ~ 180度)
-        # 且要防止手指「垂下去」低於水平面，可以加一個簡單的限制：
-        # 如果手指向下指，強制鎖定在水平位置
-        if 0 <= angle <= 180:
-            angle += 180
-        else:
-            if angle > 180:
-                angle = 360
-            elif angle < 0:
-                angle = 180
-        print(angle)
         return angle
+
+    def update(self, mid_base, mid_tip, pinky_base, pinky_tip, t_sec):
+        """
+        mid_base/tip: 中指根部(9)與指尖(12)
+        pinky_base/tip: 小指根部(17)與指尖(20)
+        """
+        # 分別計算中指與小指的角度
+        angle_mid = self._calculate_segment_angle(mid_base, mid_tip)
+        angle_pinky = self._calculate_segment_angle(pinky_base, pinky_tip)
+
+        # 取平均值
+        avg_angle = (angle_mid + angle_pinky) / 2.0
+
+        # 這裡可以根據你的遊戲需求保留或修改原有的限制邏輯
+        # 例如：只偵測上半圓
+        # if avg_angle > 180:
+        #     avg_angle = 180 # 舉例：強制限制在上方
+
+        # print(f"Mid: {angle_mid:.1f}, Pinky: {angle_pinky:.1f}, Avg: {avg_angle:.1f}")
+        return avg_angle

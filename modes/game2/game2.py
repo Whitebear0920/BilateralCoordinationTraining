@@ -37,8 +37,8 @@ class Game2Scene:
         self.blue_sword = AssetsManager.get_image("BLUE_SWORD")
         self.red_sword = self._rescale_ration(self.red_sword, scale_ration)
         self.blue_sword = self._rescale_ration(self.blue_sword, scale_ration)
-        self.left_sword = LightSword(self.red_sword, self.angle_api, "LEFT") # 左手紅
-        self.right_sword = LightSword(self.blue_sword, self.angle_api, "RIGHT") # 右手藍
+        self.left_sword = LightSword(self.red_sword, self.angle_api, "LEFT", "RED") # 右手紅
+        self.right_sword = LightSword(self.blue_sword, self.angle_api, "RIGHT", "BLUE") # 左手藍
         self.sword_sprite_manager = pygame.sprite.Group()
         self.sword_sprite_manager.add(self.left_sword)
         self.sword_sprite_manager.add(self.right_sword)
@@ -60,7 +60,6 @@ class Game2Scene:
         # info box 文字內容
         self.info_text = "準備開始囉!!"
 
-
     def update(self): # first call in the main loop
         if self.game_state == "START":
             # 更新時間
@@ -81,7 +80,7 @@ class Game2Scene:
                 for m in hit_list:
                     # 增加 m.is_active() 判斷，避免重複砍中正在碎裂的彈珠
                     if m.is_active() and not m.is_broken():
-                        if (m.color == "RED" and sword.hand == "LEFT") or (m.color == "BLUE" and sword.hand == "RIGHT"):
+                        if (m.color == "RED" and sword.color == "RED") or (m.color == "BLUE" and sword.color == "BLUE"):
                             m.hit()
 
     def draw(self): # second call in the main loop
@@ -343,9 +342,9 @@ class Game2Scene:
             # 生成一顆marble 隨機位置 隨機顏色
         random_number = random.randint(1, 2)
         if random_number == 1:
-            marble_color = "RED" # left area
+            marble_color = "RED" # left area. right hand
         else:
-            marble_color = "BLUE" # right area
+            marble_color = "BLUE" # right area. left hand
         temp_active = []
         temp_broken = []
         for m in self.marble_pool[marble_color]:
