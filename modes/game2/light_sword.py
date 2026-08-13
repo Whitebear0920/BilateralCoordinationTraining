@@ -13,7 +13,7 @@ class LightSword(pygame.sprite.Sprite):
         self.mask = pygame.mask.from_surface(self.image)
         self.angle_info_api = angle_fun
 
-        self.area = area
+        self.area = area # Sword moving area not hand
         self.color = color
 
         self.lerp_factor = 0.5
@@ -23,29 +23,39 @@ class LightSword(pygame.sprite.Sprite):
         self.radius = inner_circle_radius
 
         # 3. 自動移動參數
-        if area == "LEFT":
+        if self.area == "LEFT":
             self.angle = self.angle_info_api()["right_finger_angle"]
-        elif area == "RIGHT":
+        elif self.area == "RIGHT":
             self.angle = self.angle_info_api()["left_finger_angle"]
 
 
     def update(self):
         # A. 取得目標角度 (來自 Mediapipe)
         data = self.angle_info_api()
+
+        left = "left_finger_angle"
+        right = "right_finger_angle"
+
+        print(f"left finger: {data[left]}, right finger: {data[right]}")
+
+
         target_angle = data["left_finger_angle"] + 180  if self.area == "RIGHT" else data["right_finger_angle"] + 180
-        print(target_angle)
         # B. 計算最短路徑的角度差 (處理 0/360 度跨越問題)
         # 這是為了確保從 359 度移動到 1 度時，是前進 2 度而不是後退 358 度
         diff = (target_angle - self.angle + 180) % 360 - 180
-
         # C. 應用平滑公式：當前角度 += 差距 * 平滑係數
         self.angle += diff * self.lerp_factor
+
+
 
         # 確保角度保持在 0-360 之間
         if self.angle <= 180:
             self.angle = 180
         elif self.angle >= 360:
             self.angle = 360
+
+        # if self.area =="LEFT":
+        #     print(f"left sword angle: {self.angle}")
 
         offset = pygame.Vector2(-self.radius, 0).rotate(self.angle - 180)
         new_pos = self.pivot + offset

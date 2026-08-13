@@ -18,10 +18,6 @@ class AngleRecognizer:
         # 使用 atan2 取得弧度並轉角度
         angle = math.degrees(math.atan2(dy, dx))
 
-        # 標準化為 0 ~ 360 度
-        if angle < 0:
-            angle += 360
-
         return angle
 
     def update(self, mid_base, mid_tip, pinky_base, pinky_tip, t_sec):

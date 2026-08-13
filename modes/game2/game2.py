@@ -188,7 +188,7 @@ class Game2Scene:
             self.screen.blit(surf, rect)
 
         # 提示文字
-        self._draw_text("左手紅色 右手藍色", config.WIDTH // 2, box_y + 90)
+        self._draw_text("左手藍色 右手紅色", config.WIDTH // 2, box_y + 90)
 
         # 4. 按鈕處理
         btn_w, btn_h = 120, 45
@@ -337,6 +337,7 @@ class Game2Scene:
         if score > level_info_dict[self.level]["pass_score"]:
             if self.level < 3:
                 level_info_dict[self.level+1]["previous_level_passed"] = True
+
     def _generate_marble(self):
         # Every 1 sec go to marble_pool find an inactive sprite.
             # 生成一顆marble 隨機位置 隨機顏色
