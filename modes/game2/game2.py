@@ -39,7 +39,7 @@ class Game2Scene:
         self.blue_sword = self._rescale_ration(self.blue_sword, scale_ration)
         self.left_sword = LightSword(self.red_sword, self.angle_api, "LEFT", "RED") # 右手紅
         self.right_sword = LightSword(self.blue_sword, self.angle_api, "RIGHT", "BLUE") # 左手藍
-        self.sword_sprite_manager = pygame.sprite.Group()
+        self.sword_sprite_manager = pygame.sprite.LayeredUpdates()
         self.sword_sprite_manager.add(self.left_sword)
         self.sword_sprite_manager.add(self.right_sword)
         # marble設定

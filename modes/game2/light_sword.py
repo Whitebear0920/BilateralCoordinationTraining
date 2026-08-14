@@ -38,13 +38,16 @@ class LightSword(pygame.sprite.Sprite):
 
         print(f"left finger: {data[left]}, right finger: {data[right]}")
 
+
         target_angle = data["left_finger_angle"] if self.area == "RIGHT" else data["right_finger_angle"]
-        if -180 <= target_angle <= -90:
-            target_angle = 360
-        elif 0 <= target_angle < -90:
-            target_angle = 180
+
+        if not 15 <= target_angle <= 165:
+            self.image.set_alpha(0)
+            return
         else:
-            target_angle += 180
+            self.image.set_alpha(255)
+
+        target_angle += 180
 
         # B. 計算最短路徑的角度差 (處理 0/360 度跨越問題)
         # 這是為了確保從 359 度移動到 1 度時，是前進 2 度而不是後退 358 度
