@@ -38,15 +38,19 @@ class LightSword(pygame.sprite.Sprite):
 
         print(f"left finger: {data[left]}, right finger: {data[right]}")
 
+        target_angle = data["left_finger_angle"] if self.area == "RIGHT" else data["right_finger_angle"]
+        if -180 <= target_angle <= -90:
+            target_angle = 360
+        elif 0 <= target_angle < -90:
+            target_angle = 180
+        else:
+            target_angle += 180
 
-        target_angle = data["left_finger_angle"] + 180  if self.area == "RIGHT" else data["right_finger_angle"] + 180
         # B. 計算最短路徑的角度差 (處理 0/360 度跨越問題)
         # 這是為了確保從 359 度移動到 1 度時，是前進 2 度而不是後退 358 度
         diff = (target_angle - self.angle + 180) % 360 - 180
         # C. 應用平滑公式：當前角度 += 差距 * 平滑係數
         self.angle += diff * self.lerp_factor
-
-
 
         # 確保角度保持在 0-360 之間
         if self.angle <= 180:
